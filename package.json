@@ -1,0 +1,17 @@
+{
+  "name": "mangseblaksite",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@elysiajs/html": "^1.4.2",
+    "@libsql/client": "^0.17.3",
+    "elysia": "^1.4.28"
+  }
+}
