@@ -1,12 +1,13 @@
 import { Elysia } from "elysia";
 import { html } from "@elysiajs/html";
-import { LandingView } from "./views/LandingPage"; // <-- Import View Landing Page
+import { LandingView } from "./views/LandingPage"; 
+import { MenuView } from "./views/Menu";
 
 const app = new Elysia()
   .use(html())
   
-  // Route Utama: Menampilkan Landing Page Seblak Korea
   .get("/", () => LandingView.HalamanUtama())
+  .get("/menu", () => MenuView.HalamanMenu([]))
 
   .listen(3000);
 
