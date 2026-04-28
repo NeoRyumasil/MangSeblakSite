@@ -7,7 +7,10 @@ const app = new Elysia()
   .use(html())
   
   .get("/", () => LandingView.HalamanUtama())
-  .get("/menu", () => MenuView.HalamanMenu([]))
+  .get("/menu", () => MenuView.HalamanMenu([
+    { id_barang: 1, nama: "Seblak Original", harga: 16000 },
+    { id_barang: 2, nama: "Seblak Frozen", harga: 16000 },
+  ]))
 
   .listen(3000);
 
