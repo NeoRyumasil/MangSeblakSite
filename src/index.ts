@@ -4,6 +4,7 @@ import { LandingView } from "./views/LandingPage";
 import { MenuView } from "./views/MenuPage";
 import { PesananView } from "./views/PesananPage";
 import { PreorderView } from "./views/PreOrderPage";
+import { KeuanganView } from "./views/KeuanganPage";
 
 const app = new Elysia()
   .use(html())
@@ -57,6 +58,47 @@ const app = new Elysia()
       status_pengantaran: "diproses",
     }
   ]))
+
+  .get("/keuangan", () => KeuanganView.HalamanKeuangan({
+    bulan: "Juli 2026",
+    total_pendapatan: 8450000,
+    total_pengeluaran: 4920000,
+    total_keuntungan: 3530000,
+    total_pesanan: 312,
+    rata_per_hari: 281667,
+    item_terlaris: "Seblak Original",
+    item_terlaris_qty: 148,
+    data_mingguan: [
+      {
+        minggu: "Minggu 1",
+        pendapatan: 1850000,
+        pengeluaran: 1080000,
+        keuntungan: 770000,
+        jumlah_pesanan: 68,
+      },
+      {
+        minggu: "Minggu 2",
+        pendapatan: 2200000,
+        pengeluaran: 1250000,
+        keuntungan: 950000,
+        jumlah_pesanan: 81,
+      },
+      {
+        minggu: "Minggu 3",
+        pendapatan: 2100000,
+        pengeluaran: 1260000,
+        keuntungan: 840000,
+        jumlah_pesanan: 79,
+      },
+      {
+        minggu: "Minggu 4",
+        pendapatan: 2300000,
+        pengeluaran: 1330000,
+        keuntungan: 970000,
+        jumlah_pesanan: 84,
+      },
+    ],
+  }))
 
   .listen(3000);
 
