@@ -5,6 +5,7 @@ import { MenuView } from "./views/MenuPage";
 import { PesananView } from "./views/PesananPage";
 import { PreorderView } from "./views/PreOrderPage";
 import { KeuanganView } from "./views/KeuanganPage";
+import { LoginView } from "./views/LoginPage";
 
 const app = new Elysia()
   .use(html())
@@ -99,6 +100,9 @@ const app = new Elysia()
       },
     ],
   }))
+
+  .get("/login", () => LoginView.HalamanLogin())
+
 
   .listen(3000);
 

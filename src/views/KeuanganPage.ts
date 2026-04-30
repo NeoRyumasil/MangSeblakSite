@@ -97,7 +97,7 @@ export const KeuanganView = {
 
             <!-- Bar Chart SVG -->
             <div class="relative">
-              <div class="flex items-end gap-4 h-48 px-2">
+              <div class="flex items-end gap-4 px-2" style="height:220px; padding-top:40px; overflow:visible">
                 ${rekap.data_mingguan.map((d, i) => {
                   const hPendapatan = Math.round((d.pendapatan / maxPendapatan) * 180);
                   const hPengeluaran = Math.round((d.pengeluaran / maxPendapatan) * 180);
@@ -105,7 +105,7 @@ export const KeuanganView = {
                   return `
                   <div class="flex-1 flex flex-col items-center gap-1">
                     <!-- Bars -->
-                    <div class="w-full flex items-end justify-center gap-1" style="height:185px">
+                    <div class="w-full flex items-end justify-center gap-1" style="height:180px; overflow:visible">
                       <div class="flex-1 rounded-t-lg bg-blue-400 transition-all duration-700 hover:bg-blue-500 relative group" style="height:${hPendapatan}px; min-width:8px">
                         <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-10">
                           Rp ${d.pendapatan.toLocaleString('id-ID')}
