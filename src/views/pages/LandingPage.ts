@@ -55,7 +55,6 @@ export const LandingView = {
       </section>
     `;
 
-    // 2. Kembalikan fungsi Layout dengan membawa Judul dan Konten
     return Layout("Seblak Korea Mang Jay - Beranda", content);
   }
 };

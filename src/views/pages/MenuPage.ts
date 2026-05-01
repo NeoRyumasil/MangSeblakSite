@@ -1,4 +1,5 @@
 import { Footer } from "../components/Footer";
+import { Header } from "../components/Header";
 
 type ItemMenu = {
   id_barang: number;
@@ -37,19 +38,7 @@ const MenuLayout = (title: string, content: string) => `
   </head>
   <body class="bg-orange-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col pt-20">
 
-    <nav class="bg-white shadow-md fixed w-full z-10 top-0">
-      <div class="max-w-6xl mx-auto px-4">
-        <div class="flex justify-between items-center py-4">
-          <a href="/" class="text-2xl font-bold text-red-600 hover:text-red-700 transition">
-            🍜 Seblak Korea Mang Jay
-          </a>
-          <div class="hidden md:flex space-x-6">
-            <a href="/#tentang" class="hover:text-red-500 font-medium transition">Tentang</a>
-            <a href="/menu" class="text-red-600 font-bold transition">Menu</a>
-          </div>
-        </div>
-      </div>
-    </nav>
+    ${Header("menu")}
 
     <main class="flex-grow">
       ${content}
@@ -123,7 +112,6 @@ export const MenuView = {
     `
   ),
 
-  // Fragment HTML untuk isi keranjang — di-swap oleh HTMX
   IsiKeranjang: (keranjang: ItemKeranjang[], total: number) => {
     if (keranjang.length === 0) {
       return `
