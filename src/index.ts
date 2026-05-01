@@ -1,11 +1,11 @@
 import { Elysia } from "elysia";
 import { html } from "@elysiajs/html";
-import { LandingView } from "./views/LandingPage"; 
-import { MenuView } from "./views/MenuPage";
-import { PesananView } from "./views/PesananPage";
-import { PreorderView } from "./views/PreOrderPage";
-import { KeuanganView } from "./views/KeuanganPage";
-import { LoginView } from "./views/LoginPage";
+import { LandingView } from "./views/pages/LandingPage"; 
+import { MenuView } from "./views/pages/MenuPage";
+import { PesananView } from "./views/pages/PesananPage";
+import { PreorderView } from "./views/pages/PreOrderPage";
+import { KeuanganView } from "./views/pages/KeuanganPage";
+import { LoginView } from "./views/pages/LoginPage";
 
 const app = new Elysia()
   .use(html())

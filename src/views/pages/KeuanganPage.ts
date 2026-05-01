@@ -1,4 +1,4 @@
-import { Layout } from "./components/Layout";
+import { Layout } from "../components/Layout";
 
 type DataMinggu = {
   minggu: string; // "Minggu 1", "Minggu 2", dst
