@@ -129,18 +129,18 @@ export const LoginView = {
           ` : ''}
 
           <!-- Form -->
-          <form method="POST" action="/login" class="space-y-5">
+          <form method="POST" action="/auth/login" class="space-y-5">
 
             <div>
-              <label class="block text-white/70 text-xs font-semibold uppercase tracking-widest mb-2">Username</label>
+              <label class="block text-white/70 text-xs font-semibold uppercase tracking-widest mb-2">Email</label>
               <div class="relative">
-                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 text-lg">👤</span>
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 text-lg">✉️</span>
                 <input
-                  type="text"
-                  name="username"
-                  placeholder="Masukkan username"
+                  type="email"
+                  name="email"
+                  placeholder="Masukkan email"
                   required
-                  autocomplete="username"
+                  autocomplete="email"
                   class="input-field w-full bg-white/10 border border-white/20 text-white placeholder-white/30 rounded-xl pl-11 pr-4 py-3.5 text-sm font-medium"
                 />
               </div>

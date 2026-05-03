@@ -7,6 +7,9 @@ import { PreorderView } from "./views/pages/PreOrderPage";
 import { KeuanganView } from "./views/pages/KeuanganPage";
 import { LoginView } from "./views/pages/LoginPage";
 import { AdminView, StokView, KeuanganAdminView, StaffView } from "./views/pages/AdminPage";
+import { StokController } from "./controllers/StokController";
+import { AuthController } from "./controllers/Auth/AuthController";
+import { StaffController } from "./controllers/StaffController";
 
 // ============================================================
 // Dummy Data
@@ -46,6 +49,11 @@ const dummyStaff = [
 const app = new Elysia()
   .use(html())
 
+  // Controllers real (DB-connected)
+  .use(AuthController)   // POST /auth/login, GET /auth/logout, POST /auth/register
+  .use(StaffController)  // CRUD /admin/staff/*
+  .use(StokController)   // CRUD /admin/stok/*
+
   // ----------------------------------------------------------
   // Public
   // ----------------------------------------------------------
@@ -62,8 +70,7 @@ const app = new Elysia()
   ]))
 
   .get("/login", () => LoginView.HalamanLogin())
-  .post("/login", () => LoginView.HalamanLogin("Username atau password salah."))
-  .get("/logout", ({ set }) => { set.redirect = "/login"; })
+  .get("/logout", ({ set }) => { set.redirect = "/auth/logout"; })
 
   // ----------------------------------------------------------
   // Pesanan & Preorder
@@ -119,29 +126,7 @@ const app = new Elysia()
     staff: dummyStaff,
   }))
 
-  // ----------------------------------------------------------
-  // Admin: Stok Bahan
-  // ----------------------------------------------------------
-
-  .get("/admin/stok", () => StokView.HalamanStok(dummyStok))
-
-  .get("/admin/stok/edit/:id", ({ params }) => {
-    const item = dummyStok.find(s => s.id === Number(params.id));
-    if (!item) return new Response("Not found", { status: 404 });
-    return StokView.FormEditStok(item);
-  })
-
-  .post("/admin/stok/tambah", ({ body, set }) => {
-    // TODO: insert ke DB
-    console.log("Tambah stok:", body);
-    set.redirect = "/admin/stok";
-  })
-
-  .post("/admin/stok/update/:id", ({ params, body, set }) => {
-    // TODO: update ke DB
-    console.log(`Update stok id ${params.id}:`, body);
-    set.redirect = "/admin/stok";
-  })
+  // Stok: ditangani StokController
 
   // ----------------------------------------------------------
   // Admin: Keuangan
@@ -162,43 +147,7 @@ const app = new Elysia()
     ],
   }))
 
-  // ----------------------------------------------------------
-  // Admin: Staff
-  // ----------------------------------------------------------
-
-  .get("/admin/staff", () => StaffView.HalamanStaff(dummyStaff))
-
-  .get("/admin/staff/registrasi", () => StaffView.HalamanRegistrasi())
-
-  .post("/admin/staff/registrasi", ({ body, set }) => {
-    // TODO: insert ke DB
-    console.log("Registrasi staff:", body);
-    set.redirect = "/admin/staff";
-  })
-
-  .get("/admin/staff/edit/:id", ({ params }) => {
-    const item = dummyStaff.find(s => s.id === Number(params.id));
-    if (!item) return new Response("Not found", { status: 404 });
-    return StaffView.HalamanEditStaff(item);
-  })
-
-  .post("/admin/staff/update/:id", ({ params, body, set }) => {
-    // TODO: update ke DB
-    console.log(`Update staff id ${params.id}:`, body);
-    set.redirect = "/admin/staff";
-  })
-
-  .post("/admin/staff/aktifkan/:id", ({ params, set }) => {
-    // TODO: update aktif = true di DB
-    console.log(`Aktifkan staff id ${params.id}`);
-    set.redirect = "/admin/staff";
-  })
-
-  .post("/admin/staff/nonaktifkan/:id", ({ params, set }) => {
-    // TODO: update aktif = false di DB
-    console.log(`Non-aktifkan staff id ${params.id}`);
-    set.redirect = "/admin/staff";
-  })
+  // Staff: ditangani StaffController
 
   // ----------------------------------------------------------
   // Keranjang (HTMX partials)
