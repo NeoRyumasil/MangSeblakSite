@@ -49,6 +49,39 @@ const dummyStaff = [
 const app = new Elysia()
   .use(html()) // Pastikan plugin HTML terpasang di atas
 
+  // ----------------------------------------------------------
+  // MIDDLEWARE GLOBAL: Wajib Login
+  // Mencegat semua request yang tidak masuk dalam daftar publik
+  // ----------------------------------------------------------
+  .onBeforeHandle(({ cookie: { session }, path }) => {
+    // Daftar path yang boleh diakses TANPA harus login
+    const publicPaths = [
+      "/",            // Landing Page utama
+      "/menu",        // Menu Katalog
+      "/login",       // Form Halaman Login
+      "/auth/login",  // Endpoint proses verifikasi Login (POST)
+      "/logout",      // Rute Bantuan Logout
+      "/auth/logout"  // Endpoint Hapus Sesi Logout (GET)
+    ];
+
+    // Jika user sedang mencoba mengakses path publik, biarkan lewat
+    if (publicPaths.includes(path)) {
+      return; 
+    }
+
+    // Jika user mengakses path selain di atas, dan TIDAK memiliki session (belum login)
+    // Lempar kembali ke halaman login tanpa mengeksekusi controller yang dituju
+    if (!session?.value) {
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: "/login",
+          "HX-Redirect": "/login"
+        }
+      });
+    }
+  })
+
   // Controllers real (DB-connected)
   .use(AuthController)   // POST /auth/login, GET /auth/logout, POST /auth/register
   .use(StaffController)  // CRUD /admin/staff/*
@@ -74,9 +107,13 @@ const app = new Elysia()
   
   // Rute bantuan untuk memanggil controller logout
   .get("/logout", ({ set }) => { 
-    set.headers["HX-Redirect"] = "/auth/logout"; 
-    set.redirect = "/auth/logout"; 
-    return;
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: "/auth/logout",
+        "HX-Redirect": "/auth/logout",
+      },
+    });
   })
 
   // ----------------------------------------------------------
@@ -159,27 +196,43 @@ const app = new Elysia()
   .get("/keranjang", () => MenuView.IsiKeranjang([], 0))
 
   .post("/keranjang/tambah", ({ set }) => {
-    set.headers["HX-Redirect"] = "/keranjang";
-    set.redirect = "/keranjang";
-    return;
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: "/keranjang",
+        "HX-Redirect": "/keranjang",
+      },
+    });
   })
 
   .post("/keranjang/kurang", ({ set }) => {
-    set.headers["HX-Redirect"] = "/keranjang";
-    set.redirect = "/keranjang";
-    return;
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: "/keranjang",
+        "HX-Redirect": "/keranjang",
+      },
+    });
   })
 
   .post("/keranjang/hapus", ({ set }) => {
-    set.headers["HX-Redirect"] = "/keranjang";
-    set.redirect = "/keranjang";
-    return;
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: "/keranjang",
+        "HX-Redirect": "/keranjang",
+      },
+    });
   })
 
   .post("/checkout", ({ set }) => {
-    set.headers["HX-Redirect"] = "/pesanan";
-    set.redirect = "/pesanan";
-    return;
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: "/pesanan",
+        "HX-Redirect": "/pesanan",
+      },
+    });
   })
 
   // ----------------------------------------------------------
@@ -188,16 +241,24 @@ const app = new Elysia()
 
   .post("/admin/selesaikan/:id", ({ params, set }) => {
     console.log(`Selesaikan pesanan id ${params.id}`);
-    set.headers["HX-Redirect"] = "/pesanan";
-    set.redirect = "/pesanan";
-    return;
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: "/pesanan",
+        "HX-Redirect": "/pesanan",
+      },
+    });
   })
 
   .post("/admin/preorder/selesaikan/:id", ({ params, set }) => {
     console.log(`Selesaikan preorder id ${params.id}`);
-    set.headers["HX-Redirect"] = "/preorder";
-    set.redirect = "/preorder";
-    return;
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: "/preorder",
+        "HX-Redirect": "/preorder",
+      },
+    });
   })
 
   .listen(3000);
