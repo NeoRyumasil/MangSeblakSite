@@ -61,7 +61,12 @@ const app = new Elysia()
       "/login",       // Form Halaman Login
       "/auth/login",  // Endpoint proses verifikasi Login (POST)
       "/logout",      // Rute Bantuan Logout
-      "/auth/logout"  // Endpoint Hapus Sesi Logout (GET)
+      "/auth/logout",  // Endpoint Hapus Sesi Logout (GET)
+      "/keranjang",       // Halaman Keranjang
+      "/keranjang/tambah", // Endpoint tambah item ke keranjang (POST)
+      "/keranjang/kurang", // Endpoint kurang item di keranjang (POST)
+      "/keranjang/hapus",  // Endpoint hapus item dari keranjang (POST)
+      "/checkout",         // Endpoint checkout pesanan (POST)
     ];
 
     // Jika user sedang mencoba mengakses path publik, biarkan lewat
