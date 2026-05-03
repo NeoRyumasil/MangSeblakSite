@@ -47,7 +47,7 @@ const dummyStaff = [
 // ============================================================
 
 const app = new Elysia()
-  .use(html())
+  .use(html()) // Pastikan plugin HTML terpasang di atas
 
   // Controllers real (DB-connected)
   .use(AuthController)   // POST /auth/login, GET /auth/logout, POST /auth/register
@@ -69,8 +69,15 @@ const app = new Elysia()
     { id_barang: 6, nama: "Es Boba Gochujang", harga: 12000 },
   ]))
 
+  // Menampilkan UI halaman login
   .get("/login", () => LoginView.HalamanLogin())
-  .get("/logout", ({ set }) => { set.redirect = "/auth/logout"; })
+  
+  // Rute bantuan untuk memanggil controller logout
+  .get("/logout", ({ set }) => { 
+    set.headers["HX-Redirect"] = "/auth/logout"; 
+    set.redirect = "/auth/logout"; 
+    return;
+  })
 
   // ----------------------------------------------------------
   // Pesanan & Preorder
@@ -126,8 +133,6 @@ const app = new Elysia()
     staff: dummyStaff,
   }))
 
-  // Stok: ditangani StokController
-
   // ----------------------------------------------------------
   // Admin: Keuangan
   // ----------------------------------------------------------
@@ -147,8 +152,6 @@ const app = new Elysia()
     ],
   }))
 
-  // Staff: ditangani StaffController
-
   // ----------------------------------------------------------
   // Keranjang (HTMX partials)
   // ----------------------------------------------------------
@@ -156,23 +159,27 @@ const app = new Elysia()
   .get("/keranjang", () => MenuView.IsiKeranjang([], 0))
 
   .post("/keranjang/tambah", ({ set }) => {
-    // TODO: tambah item ke session/DB
+    set.headers["HX-Redirect"] = "/keranjang";
     set.redirect = "/keranjang";
+    return;
   })
 
   .post("/keranjang/kurang", ({ set }) => {
-    // TODO: kurangi qty di session/DB
+    set.headers["HX-Redirect"] = "/keranjang";
     set.redirect = "/keranjang";
+    return;
   })
 
   .post("/keranjang/hapus", ({ set }) => {
-    // TODO: hapus item dari session/DB
+    set.headers["HX-Redirect"] = "/keranjang";
     set.redirect = "/keranjang";
+    return;
   })
 
   .post("/checkout", ({ set }) => {
-    // TODO: proses pesanan
+    set.headers["HX-Redirect"] = "/pesanan";
     set.redirect = "/pesanan";
+    return;
   })
 
   // ----------------------------------------------------------
@@ -180,15 +187,17 @@ const app = new Elysia()
   // ----------------------------------------------------------
 
   .post("/admin/selesaikan/:id", ({ params, set }) => {
-    // TODO: update status pesanan di DB
     console.log(`Selesaikan pesanan id ${params.id}`);
+    set.headers["HX-Redirect"] = "/pesanan";
     set.redirect = "/pesanan";
+    return;
   })
 
   .post("/admin/preorder/selesaikan/:id", ({ params, set }) => {
-    // TODO: update status preorder di DB
     console.log(`Selesaikan preorder id ${params.id}`);
+    set.headers["HX-Redirect"] = "/preorder";
     set.redirect = "/preorder";
+    return;
   })
 
   .listen(3000);

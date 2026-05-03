@@ -39,7 +39,7 @@ const getAllStaff = async (): Promise<Staff[]> => {
   return (result.rows as unknown as StaffRaw[]).map(rowToStaff);
 };
 
-// Pastikan nilai selalu InValue (tidak pernah undefined)
+// Pastikan nilai selalu InValue (tidak pernah undefined)[cite: 2]
 const str = (v: unknown): InValue => (v != null ? String(v) : "");
 const num = (v: unknown): InValue => Number(v);
 
@@ -50,26 +50,26 @@ const num = (v: unknown): InValue => Number(v);
 export const StaffController = new Elysia({ prefix: "/admin/staff" })
   .use(html())
 
-  // GET /admin/staff
+  // GET /admin/staff[cite: 2]
   .get("/", async () => {
     const staff = await getAllStaff();
     return StaffView.HalamanStaff(staff);
   })
 
-  // GET /admin/staff/registrasi
+  // GET /admin/staff/registrasi[cite: 2]
   .get("/registrasi", () => StaffView.HalamanRegistrasi())
 
-  // POST /admin/staff/registrasi
+  // POST /admin/staff/registrasi[cite: 2]
   .post(
     "/registrasi",
     async ({ body, set }) => {
       const username = str(body.username);
       const nama     = str(body.nama);
-      const email    = str(body.email);   // Optional -> "" jika kosong
+      const email    = str(body.email);   // Optional -> "" jika kosong[cite: 2]
       const role     = str(body.role);
       const password = str(body.password);
 
-      // Cek username duplikat
+      // Cek username duplikat[cite: 2]
       const existing = await db.execute({
         sql: "SELECT id FROM users WHERE username = ?",
         args: [username],
@@ -84,7 +84,6 @@ export const StaffController = new Elysia({ prefix: "/admin/staff" })
       });
 
       const tanggal: InValue = new Date().toISOString().slice(0, 10);
-
       const no_hp: InValue = str(body.no_hp);
 
       await db.execute({
@@ -93,7 +92,9 @@ export const StaffController = new Elysia({ prefix: "/admin/staff" })
         args: [nama, username, email, hashedPassword, role, no_hp, tanggal],
       });
 
+      set.headers["HX-Redirect"] = "/admin/staff"; // Dukungan HTMX
       set.redirect = "/admin/staff";
+      return; // Wajib dihentikan di sini
     },
     {
       body: t.Object({
@@ -112,7 +113,7 @@ export const StaffController = new Elysia({ prefix: "/admin/staff" })
     }
   )
 
-  // GET /admin/staff/edit/:id
+  // GET /admin/staff/edit/:id[cite: 2]
   .get("/edit/:id", async ({ params }) => {
     const result = await db.execute({
       sql: "SELECT * FROM users WHERE id = ?",
@@ -123,7 +124,7 @@ export const StaffController = new Elysia({ prefix: "/admin/staff" })
     return StaffView.HalamanEditStaff(rowToStaff(raw));
   })
 
-  // POST /admin/staff/update/:id
+  // POST /admin/staff/update/:id[cite: 2]
   .post(
     "/update/:id",
     async ({ params, body, set }) => {
@@ -133,7 +134,7 @@ export const StaffController = new Elysia({ prefix: "/admin/staff" })
       const no_hp    = str(body.no_hp);
       const role     = str(body.role);
 
-      // Cek username duplikat (kecuali diri sendiri)
+      // Cek username duplikat (kecuali diri sendiri)[cite: 2]
       const existing = await db.execute({
         sql: "SELECT id FROM users WHERE username = ? AND id != ?",
         args: [username, id],
@@ -150,7 +151,7 @@ export const StaffController = new Elysia({ prefix: "/admin/staff" })
         );
       }
 
-      // Kalau password diisi, hash ulang
+      // Kalau password diisi, hash ulang[cite: 2]
       const newPassword = body.password?.trim();
       if (newPassword && newPassword.length > 0) {
         const hashed: InValue = await Bun.password.hash(newPassword, {
@@ -168,7 +169,9 @@ export const StaffController = new Elysia({ prefix: "/admin/staff" })
         });
       }
 
+      set.headers["HX-Redirect"] = "/admin/staff"; // Dukungan HTMX
       set.redirect = "/admin/staff";
+      return; // Wajib dihentikan di sini
     },
     {
       body: t.Object({
@@ -186,20 +189,24 @@ export const StaffController = new Elysia({ prefix: "/admin/staff" })
     }
   )
 
-  // POST /admin/staff/aktifkan/:id
+  // POST /admin/staff/aktifkan/:id[cite: 2]
   .post("/aktifkan/:id", async ({ params, set }) => {
     await db.execute({
       sql: "UPDATE users SET aktif = 1 WHERE id = ?",
       args: [num(params.id)],
     });
+    set.headers["HX-Redirect"] = "/admin/staff"; // Dukungan HTMX
     set.redirect = "/admin/staff";
+    return;
   })
 
-  // POST /admin/staff/nonaktifkan/:id
+  // POST /admin/staff/nonaktifkan/:id[cite: 2]
   .post("/nonaktifkan/:id", async ({ params, set }) => {
     await db.execute({
       sql: "UPDATE users SET aktif = 0 WHERE id = ?",
       args: [num(params.id)],
     });
+    set.headers["HX-Redirect"] = "/admin/staff"; // Dukungan HTMX
     set.redirect = "/admin/staff";
+    return;
   });

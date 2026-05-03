@@ -28,6 +28,15 @@ export const UserModel = {
     return (result.rows[0] as unknown as User) ?? null;
   },
 
+  // Cari user by username
+  findByUsername: async (username: string): Promise<User | null> => {
+    const result = await db.execute({
+      sql: "SELECT * FROM users WHERE username = ?",
+      args: [username],
+    });
+    return (result.rows[0] as unknown as User) ?? null;
+  },
+
   // Cari user by email
   findByEmail: async (email: string): Promise<User | null> => {
     const result = await db.execute({
