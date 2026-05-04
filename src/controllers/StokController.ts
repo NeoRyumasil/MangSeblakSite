@@ -1,40 +1,18 @@
 import { Elysia, t } from "elysia";
-import { db } from "../models/Database";
+import { StokModel } from "../models/Stok";
 import { StokView } from "../views/pages/AdminPage";
 
 // ============================================================
-// Types — disesuaikan dengan skema tabel `barang` di Turso
-// ============================================================
-
-export type Barang = {
-  id_barang: number;
-  nama: string;
-  harga: number;
-  stok: number;
-};
-
-// ============================================================
-// Helper: ambil semua barang dari DB
-// ============================================================
-
-const getAllBarang = async (): Promise<Barang[]> => {
-  const result = await db.execute(
-    "SELECT id_barang, nama, harga, stok FROM barang ORDER BY nama ASC"
-  );
-  return result.rows as unknown as Barang[];
-};
-
-// ============================================================
-// Controller
+// Controller: StokController
 // ============================================================
 
 export const StokController = new Elysia({ prefix: "/admin/stok" })
 
   // ----------------------------------------------------------
-  // GET /admin/stok — halaman utama stok (render dari DB)
+  // GET /admin/stok — halaman utama stok
   // ----------------------------------------------------------
   .get("/", async () => {
-    const barang = await getAllBarang();
+    const barang = await StokModel.getAll();
     return StokView.HalamanStok(barang);
   })
 
@@ -47,12 +25,8 @@ export const StokController = new Elysia({ prefix: "/admin/stok" })
       return `<p class="text-red-500 text-sm font-medium">ID tidak valid.</p>`;
     }
 
-    const result = await db.execute(
-      "SELECT id_barang, nama, harga, stok FROM barang WHERE id_barang = ?",
-      [id]
-    );
-
-    const item = result.rows[0] as unknown as Barang | undefined;
+    const item = await StokModel.getById(id);
+    
     if (!item) {
       return `<p class="text-red-500 text-sm font-medium">Barang tidak ditemukan.</p>`;
     }
@@ -66,11 +40,10 @@ export const StokController = new Elysia({ prefix: "/admin/stok" })
   .post(
     "/tambah",
     async ({ body }) => {
-      await db.execute(
-        `INSERT INTO barang (nama, harga, stok) VALUES (?, ?, ?)`,
-        [body.nama, Number(body.harga), Number(body.stok)]
-      );
+      // Panggil operasi database lewat Model
+      await StokModel.create(body.nama, Number(body.harga), Number(body.stok));
 
+      // Redirect via HTMX agar tabel ter-refresh dan tidak whitescreen
       return new Response(null, {
         status: 302,
         headers: {
@@ -95,21 +68,13 @@ export const StokController = new Elysia({ prefix: "/admin/stok" })
     "/update/:id",
     async ({ params, body }) => {
       const id = Number(params.id);
-      if (Number.isNaN(id)) {
-        return new Response(null, {
-          status: 302,
-          headers: {
-            Location: "/admin/stok",
-            "HX-Redirect": "/admin/stok",
-          },
-        });
+      
+      if (!Number.isNaN(id)) {
+        // Panggil operasi database lewat Model
+        await StokModel.update(id, body.nama, Number(body.harga), Number(body.stok));
       }
 
-      await db.execute(
-        `UPDATE barang SET nama = ?, harga = ?, stok = ? WHERE id_barang = ?`,
-        [body.nama, Number(body.harga), Number(body.stok), id]
-      );
-
+      // Selalu redirect via HTMX baik id valid maupun tidak
       return new Response(null, {
         status: 302,
         headers: {
@@ -132,18 +97,13 @@ export const StokController = new Elysia({ prefix: "/admin/stok" })
   // ----------------------------------------------------------
   .post("/hapus/:id", async ({ params }) => {
     const id = Number(params.id);
-    if (Number.isNaN(id)) {
-      return new Response(null, {
-        status: 302,
-        headers: {
-          Location: "/admin/stok",
-          "HX-Redirect": "/admin/stok",
-        },
-      });
-    }
-
-    await db.execute("DELETE FROM barang WHERE id_barang = ?", [id]);
     
+    if (!Number.isNaN(id)) {
+      // Panggil operasi database lewat Model
+      await StokModel.delete(id);
+    }
+    
+    // Redirect via HTMX
     return new Response(null, {
       status: 302,
       headers: {
