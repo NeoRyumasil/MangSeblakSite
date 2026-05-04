@@ -16,14 +16,14 @@ import { StaffController } from "./controllers/StaffController";
 // ============================================================
 
 const dummyStok = [
-  { id: 1, nama: "Gochujang", satuan: "kg", stok_sekarang: 5, stok_minimum: 3, harga_per_satuan: 85000, terakhir_diperbarui: "2026-04-28" },
-  { id: 2, nama: "Kerupuk Seblak", satuan: "kg", stok_sekarang: 2, stok_minimum: 5, harga_per_satuan: 30000, terakhir_diperbarui: "2026-04-29" },
-  { id: 3, nama: "Tteokbokki", satuan: "kg", stok_sekarang: 0, stok_minimum: 2, harga_per_satuan: 120000, terakhir_diperbarui: "2026-04-27" },
-  { id: 4, nama: "Odeng (Fishcake)", satuan: "pcs", stok_sekarang: 40, stok_minimum: 20, harga_per_satuan: 3500, terakhir_diperbarui: "2026-04-30" },
-  { id: 5, nama: "Mozarella", satuan: "kg", stok_sekarang: 1, stok_minimum: 1, harga_per_satuan: 95000, terakhir_diperbarui: "2026-04-28" },
-  { id: 6, nama: "Kencur", satuan: "kg", stok_sekarang: 3, stok_minimum: 1, harga_per_satuan: 25000, terakhir_diperbarui: "2026-04-29" },
-  { id: 7, nama: "Gochugaru", satuan: "kg", stok_sekarang: 4, stok_minimum: 2, harga_per_satuan: 70000, terakhir_diperbarui: "2026-04-30" },
-  { id: 8, nama: "Minyak Goreng", satuan: "liter", stok_sekarang: 10, stok_minimum: 5, harga_per_satuan: 18000, terakhir_diperbarui: "2026-04-30" },
+  { id_barang: 1, nama: "Gochujang", stok: 5, harga: 85000 },
+  { id_barang: 2, nama: "Kerupuk Seblak", stok: 2, harga: 30000 },
+  { id_barang: 3, nama: "Tteokbokki", stok: 0, harga: 120000 },
+  { id_barang: 4, nama: "Odeng (Fishcake)", stok: 40, harga: 3500 },
+  { id_barang: 5, nama: "Mozarella", stok: 1, harga: 95000 },
+  { id_barang: 6, nama: "Kencur", stok: 3, harga: 25000 },
+  { id_barang: 7, nama: "Gochugaru", stok: 4, harga: 70000 },
+  { id_barang: 8, nama: "Minyak Goreng", stok: 10, harga: 18000 },
 ];
 
 const dummyKeuangan = [

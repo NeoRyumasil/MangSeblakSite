@@ -3,26 +3,25 @@ import { db } from "../models/Database";
 import { StokView } from "../views/pages/AdminPage";
 
 // ============================================================
-// Types
+// Types — disesuaikan dengan skema tabel `barang` di Turso
 // ============================================================
 
-type StokBahan = {
-  id: number;
+export type Barang = {
+  id_barang: number;
   nama: string;
-  satuan: string;
-  stok_sekarang: number;
-  stok_minimum: number;
-  harga_per_satuan: number;
-  terakhir_diperbarui: string;
+  harga: number;
+  stok: number;
 };
 
 // ============================================================
-// Helper: ambil semua stok dari DB
+// Helper: ambil semua barang dari DB
 // ============================================================
 
-const getAllStok = async (): Promise<StokBahan[]> => {
-  const result = await db.execute("SELECT * FROM stok_bahan ORDER BY nama ASC");
-  return result.rows as unknown as StokBahan[];
+const getAllBarang = async (): Promise<Barang[]> => {
+  const result = await db.execute(
+    "SELECT id_barang, nama, harga, stok FROM barang ORDER BY nama ASC"
+  );
+  return result.rows as unknown as Barang[];
 };
 
 // ============================================================
@@ -31,60 +30,64 @@ const getAllStok = async (): Promise<StokBahan[]> => {
 
 export const StokController = new Elysia({ prefix: "/admin/stok" })
 
-  // GET /admin/stok — halaman utama stok
+  // ----------------------------------------------------------
+  // GET /admin/stok — halaman utama stok (render dari DB)
+  // ----------------------------------------------------------
   .get("/", async () => {
-    const stok = await getAllStok();
-    return StokView.HalamanStok(stok);
+    const barang = await getAllBarang();
+    return StokView.HalamanStok(barang);
   })
 
+  // ----------------------------------------------------------
   // GET /admin/stok/edit/:id — partial form edit (untuk HTMX)
+  // ----------------------------------------------------------
   .get("/edit/:id", async ({ params }) => {
+    const id = Number(params.id);
+    if (Number.isNaN(id)) {
+      return `<p class="text-red-500 text-sm font-medium">ID tidak valid.</p>`;
+    }
+
     const result = await db.execute(
-      "SELECT * FROM stok_bahan WHERE id = ?",
-      [Number(params.id)]
+      "SELECT id_barang, nama, harga, stok FROM barang WHERE id_barang = ?",
+      [id]
     );
-    const item = result.rows[0] as unknown as StokBahan | undefined;
-    if (!item) return `<p class="text-red-500 text-sm">Bahan tidak ditemukan.</p>`;
+
+    const item = result.rows[0] as unknown as Barang | undefined;
+    if (!item) {
+      return `<p class="text-red-500 text-sm font-medium">Barang tidak ditemukan.</p>`;
+    }
+
     return StokView.FormEditStok(item);
   })
 
-  // POST /admin/stok/tambah — insert bahan baru
+  // ----------------------------------------------------------
+  // POST /admin/stok/tambah — insert barang baru
+  // ----------------------------------------------------------
   .post(
     "/tambah",
     async ({ body, set }) => {
-      const tanggal = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-
       await db.execute(
-        `INSERT INTO stok_bahan (nama, satuan, stok_sekarang, stok_minimum, harga_per_satuan, terakhir_diperbarui)
-              VALUES (?, ?, ?, ?, ?, ?)`,
-        [
-          body.nama,
-          body.satuan,
-          Number(body.stok_sekarang),
-          Number(body.stok_minimum),
-          Number(body.harga_per_satuan),
-          tanggal,
-        ]
+        `INSERT INTO barang (nama, harga, stok) VALUES (?, ?, ?)`,
+        [body.nama, Number(body.harga), Number(body.stok)]
       );
 
       set.redirect = "/admin/stok";
     },
     {
       body: t.Object({
-        nama:            t.String({ minLength: 1 }),
-        satuan:          t.String({ minLength: 1 }),
-        stok_sekarang:   t.Numeric(),
-        stok_minimum:    t.Numeric(),
-        harga_per_satuan: t.Numeric(),
+        nama:  t.String({ minLength: 1 }),
+        harga: t.Numeric(),
+        stok:  t.Numeric(),
       }),
     }
   )
 
-  // POST /admin/stok/update/:id — update bahan
+  // ----------------------------------------------------------
+  // POST /admin/stok/update/:id — update barang
+  // ----------------------------------------------------------
   .post(
     "/update/:id",
     async ({ params, body, set }) => {
-      const tanggal = new Date().toISOString().slice(0, 10);
       const id = Number(params.id);
       if (Number.isNaN(id)) {
         set.redirect = "/admin/stok";
@@ -92,34 +95,24 @@ export const StokController = new Elysia({ prefix: "/admin/stok" })
       }
 
       await db.execute(
-        `UPDATE stok_bahan
-              SET nama = ?, satuan = ?, stok_sekarang = ?, stok_minimum = ?, harga_per_satuan = ?, terakhir_diperbarui = ?
-              WHERE id = ?`,
-        [
-          body.nama,
-          body.satuan,
-          Number(body.stok_sekarang),
-          Number(body.stok_minimum),
-          Number(body.harga_per_satuan),
-          tanggal,
-          id,
-        ]
+        `UPDATE barang SET nama = ?, harga = ?, stok = ? WHERE id_barang = ?`,
+        [body.nama, Number(body.harga), Number(body.stok), id]
       );
 
       set.redirect = "/admin/stok";
     },
     {
       body: t.Object({
-        nama:            t.String({ minLength: 1 }),
-        satuan:          t.String({ minLength: 1 }),
-        stok_sekarang:   t.Numeric(),
-        stok_minimum:    t.Numeric(),
-        harga_per_satuan: t.Numeric(),
+        nama:  t.String({ minLength: 1 }),
+        harga: t.Numeric(),
+        stok:  t.Numeric(),
       }),
     }
   )
 
-  // POST /admin/stok/hapus/:id — hapus bahan
+  // ----------------------------------------------------------
+  // POST /admin/stok/hapus/:id — hapus barang
+  // ----------------------------------------------------------
   .post("/hapus/:id", async ({ params, set }) => {
     const id = Number(params.id);
     if (Number.isNaN(id)) {
@@ -127,9 +120,6 @@ export const StokController = new Elysia({ prefix: "/admin/stok" })
       return;
     }
 
-    await db.execute(
-      "DELETE FROM stok_bahan WHERE id = ?",
-      [id]
-    );
+    await db.execute("DELETE FROM barang WHERE id_barang = ?", [id]);
     set.redirect = "/admin/stok";
   });

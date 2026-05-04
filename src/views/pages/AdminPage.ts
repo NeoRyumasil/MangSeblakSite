@@ -2,14 +2,11 @@
 // Types
 // ============================================================
 
-type StokBahan = {
-  id: number;
+type Barang = {
+  id_barang: number;
   nama: string;
-  satuan: string;
-  stok_sekarang: number;
-  stok_minimum: number;
-  harga_per_satuan: number;
-  terakhir_diperbarui: string;
+  harga: number;
+  stok: number;
 };
 
 type RekapKeuanganRingkas = {
@@ -31,7 +28,7 @@ type Staff = {
 };
 
 export type AdminDashboardData = {
-  stok: StokBahan[];
+  stok: Barang[];
   keuangan: RekapKeuanganRingkas[];
   staff: Staff[];
 };
@@ -121,10 +118,10 @@ const AdminLayout = (title: string, activeTab: string, content: string) => `
 // Helpers: Badges
 // ============================================================
 
-const badgeStok = (sekarang: number, minimum: number) => {
-  if (sekarang === 0)
+const badgeStok = (stok: number) => {
+  if (stok === 0)
     return `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">Habis</span>`;
-  if (sekarang <= minimum)
+  if (stok <= 5)
     return `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">Hampir Habis</span>`;
   return `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">Aman</span>`;
 };
@@ -144,10 +141,10 @@ export const AdminView = {
   HalamanDashboard: (data: AdminDashboardData) => {
     const { stok, keuangan, staff } = data;
 
-    // Stok stats
-    const stokHabis   = stok.filter(s => s.stok_sekarang === 0).length;
-    const stokHampir  = stok.filter(s => s.stok_sekarang > 0 && s.stok_sekarang <= s.stok_minimum).length;
-    const stokAman    = stok.filter(s => s.stok_sekarang > s.stok_minimum).length;
+    // Stok stats (Menggunakan threshold <= 5)
+    const stokHabis   = stok.filter(s => s.stok === 0).length;
+    const stokHampir  = stok.filter(s => s.stok > 0 && s.stok <= 5).length;
+    const stokAman    = stok.filter(s => s.stok > 5).length;
 
     // Keuangan stats (bulan ini = index 0, bulan lalu = index 1)
     const bulanIni   = keuangan[0];
@@ -177,13 +174,13 @@ export const AdminView = {
           <div class="flex items-center justify-between mb-4">
             <div>
               <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-0.5">Inventaris</p>
-              <h2 class="text-xl font-black text-gray-800">🥬 Stok Bahan</h2>
+              <h2 class="text-xl font-black text-gray-800">🥬 Stok Barang</h2>
             </div>
             <div class="flex gap-2">
               <button
                 onclick="document.getElementById('modal-tambah-stok').classList.remove('hidden')"
                 class="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl font-bold text-sm transition shadow-lg shadow-red-200">
-                + Tambah Bahan
+                + Tambah Barang
               </button>
               <a href="/admin/stok" class="flex items-center gap-1 border border-gray-200 hover:border-red-400 text-gray-500 hover:text-red-600 px-4 py-2 rounded-xl font-semibold text-sm transition">
                 Lihat Semua →
@@ -213,9 +210,9 @@ export const AdminView = {
               <table class="w-full text-left text-sm">
                 <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
                   <tr>
-                    <th class="px-5 py-3">Nama Bahan</th>
-                    <th class="px-5 py-3">Stok / Min</th>
-                    <th class="px-5 py-3">Harga / Satuan</th>
+                    <th class="px-5 py-3">Nama Barang</th>
+                    <th class="px-5 py-3">Stok</th>
+                    <th class="px-5 py-3">Harga</th>
                     <th class="px-5 py-3">Status</th>
                     <th class="px-5 py-3">Aksi</th>
                   </tr>
@@ -224,22 +221,22 @@ export const AdminView = {
                   ${[...stok]
                     .sort((a, b) => {
                       // Prioritaskan habis dulu, lalu hampir habis
-                      const score = (s: StokBahan) =>
-                        s.stok_sekarang === 0 ? 0 : s.stok_sekarang <= s.stok_minimum ? 1 : 2;
+                      const score = (s: Barang) =>
+                        s.stok === 0 ? 0 : s.stok <= 5 ? 1 : 2;
                       return score(a) - score(b);
                     })
                     .slice(0, 5)
                     .map(s => `
                     <tr class="hover:bg-orange-50/40 transition">
                       <td class="px-5 py-3 font-bold text-gray-800">${s.nama}</td>
-                      <td class="px-5 py-3 font-semibold ${s.stok_sekarang <= s.stok_minimum ? "text-red-600" : "text-gray-700"}">
-                        ${s.stok_sekarang} / ${s.stok_minimum} ${s.satuan}
+                      <td class="px-5 py-3 font-semibold ${s.stok <= 5 ? "text-red-600" : "text-gray-700"}">
+                        ${s.stok}
                       </td>
-                      <td class="px-5 py-3 text-gray-500 text-xs">Rp ${s.harga_per_satuan.toLocaleString("id-ID")} / ${s.satuan}</td>
-                      <td class="px-5 py-3">${badgeStok(s.stok_sekarang, s.stok_minimum)}</td>
+                      <td class="px-5 py-3 text-gray-500 text-xs">Rp ${s.harga.toLocaleString("id-ID")}</td>
+                      <td class="px-5 py-3">${badgeStok(s.stok)}</td>
                       <td class="px-5 py-3">
                         <button
-                          hx-get="/admin/stok/edit/${s.id}"
+                          hx-get="/admin/stok/edit/${s.id_barang}"
                           hx-target="#modal-edit-stok-content"
                           hx-swap="innerHTML"
                           onclick="document.getElementById('modal-edit-stok').classList.remove('hidden')"
@@ -474,36 +471,26 @@ export const AdminView = {
 
       </div>
 
-      <!-- Modal Tambah Bahan -->
+      <!-- Modal Tambah Barang -->
       <div id="modal-tambah-stok" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
           <div class="flex items-center justify-between mb-5">
-            <h3 class="text-lg font-black">Tambah Bahan Baru</h3>
-            <button onclick="document.getElementById('modal-tambah-stok').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-xl">×</button>
+            <h3 class="text-lg font-black">Tambah Barang Baru</h3>
+            <button onclick="document.getElementById('modal-tambah-stok').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
           </div>
           <form hx-post="/admin/stok/tambah" hx-target="body" class="space-y-4">
             <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Nama Bahan</label>
-              <input type="text" name="nama" required placeholder="cth: Gochujang" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
+              <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Nama Barang</label>
+              <input type="text" name="nama" required placeholder="cth: Seblak Original" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Satuan</label>
-                <input type="text" name="satuan" required placeholder="kg, pcs, liter" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Harga (Rp)</label>
+                <input type="number" name="harga" required min="0" placeholder="0" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
               </div>
               <div>
                 <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Stok Awal</label>
-                <input type="number" name="stok_sekarang" required min="0" placeholder="0" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Stok Minimum</label>
-                <input type="number" name="stok_minimum" required min="0" placeholder="0" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Harga / Satuan</label>
-                <input type="number" name="harga_per_satuan" required min="0" placeholder="0" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
+                <input type="number" name="stok" required min="0" placeholder="0" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
               </div>
             </div>
             <div class="flex gap-3 pt-2">
@@ -518,8 +505,8 @@ export const AdminView = {
       <div id="modal-edit-stok" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
           <div class="flex items-center justify-between mb-5">
-            <h3 class="text-lg font-black">Edit Stok Bahan</h3>
-            <button onclick="document.getElementById('modal-edit-stok').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-xl">×</button>
+            <h3 class="text-lg font-black">Edit Barang</h3>
+            <button onclick="document.getElementById('modal-edit-stok').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
           </div>
           <div id="modal-edit-stok-content">
             <p class="text-gray-400 text-sm text-center py-4">Memuat data...</p>
@@ -537,25 +524,39 @@ export const AdminView = {
 // ============================================================
 
 export const StokView = {
-  HalamanStok: (stok: StokBahan[]) => {
-    const habis      = stok.filter(s => s.stok_sekarang === 0).length;
-    const hampirHabis = stok.filter(s => s.stok_sekarang > 0 && s.stok_sekarang <= s.stok_minimum).length;
-    const aman       = stok.filter(s => s.stok_sekarang > s.stok_minimum).length;
-
+ 
+  // ----------------------------------------------------------
+  // Halaman utama /admin/stok
+  // ----------------------------------------------------------
+  HalamanStok: (barang: Barang[]) => {
+    const habis       = barang.filter(b => b.stok === 0).length;
+    const hampirHabis = barang.filter(b => b.stok > 0 && b.stok <= 5).length;  // threshold: ≤ 5
+    const aman        = barang.filter(b => b.stok > 5).length;
+ 
+    const badgeStok = (stok: number) => {
+      if (stok === 0)
+        return `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">Habis</span>`;
+      if (stok <= 5)
+        return `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">Hampir Habis</span>`;
+      return `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">Aman</span>`;
+    };
+ 
     const content = `
       <div class="py-6">
+        <!-- Header -->
         <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
             <p class="text-xs font-bold text-red-500 uppercase tracking-widest mb-1">Inventaris</p>
-            <h1 class="text-3xl font-black text-gray-900">Stok Bahan</h1>
+            <h1 class="text-3xl font-black text-gray-900">Stok Barang</h1>
           </div>
           <button
             onclick="document.getElementById('modal-tambah-stok').classList.remove('hidden')"
             class="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-lg shadow-red-200">
-            + Tambah Bahan
+            + Tambah Barang
           </button>
         </div>
-
+ 
+        <!-- Stat cards -->
         <div class="grid grid-cols-3 gap-4 mb-8">
           <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
             <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">🟢 Aman</p>
@@ -570,108 +571,118 @@ export const StokView = {
             <p class="text-3xl font-black text-red-600">${habis}</p>
           </div>
         </div>
-
+ 
+        <!-- Tabel -->
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div class="p-5 border-b border-gray-50 flex items-center justify-between">
-            <h2 class="font-black text-gray-800">Daftar Bahan</h2>
-            <span class="text-xs text-gray-400">${stok.length} bahan terdaftar</span>
+            <h2 class="font-black text-gray-800">Daftar Barang</h2>
+            <span class="text-xs text-gray-400">${barang.length} barang terdaftar</span>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
               <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
                 <tr>
-                  <th class="px-5 py-4">Nama Bahan</th>
-                  <th class="px-5 py-4">Stok Sekarang</th>
-                  <th class="px-5 py-4">Stok Minimum</th>
-                  <th class="px-5 py-4">Harga / Satuan</th>
+                  <th class="px-5 py-4">#</th>
+                  <th class="px-5 py-4">Nama Barang</th>
+                  <th class="px-5 py-4">Harga</th>
+                  <th class="px-5 py-4">Stok</th>
                   <th class="px-5 py-4">Status</th>
-                  <th class="px-5 py-4">Diperbarui</th>
                   <th class="px-5 py-4">Aksi</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-50">
-                ${stok.map(s => `
+                ${barang.map(b => `
                   <tr class="hover:bg-orange-50/40 transition">
-                    <td class="px-5 py-4 font-bold text-gray-800">${s.nama}</td>
-                    <td class="px-5 py-4 font-semibold ${s.stok_sekarang <= s.stok_minimum ? "text-red-600" : "text-gray-700"}">
-                      ${s.stok_sekarang} ${s.satuan}
+                    <td class="px-5 py-4 text-gray-400 text-xs font-mono">${b.id_barang}</td>
+                    <td class="px-5 py-4 font-bold text-gray-800">${b.nama}</td>
+                    <td class="px-5 py-4 text-gray-700 font-semibold">
+                      Rp ${b.harga.toLocaleString("id-ID")}
                     </td>
-                    <td class="px-5 py-4 text-gray-500">${s.stok_minimum} ${s.satuan}</td>
-                    <td class="px-5 py-4 text-gray-600">Rp ${s.harga_per_satuan.toLocaleString("id-ID")} / ${s.satuan}</td>
-                    <td class="px-5 py-4">${badgeStok(s.stok_sekarang, s.stok_minimum)}</td>
-                    <td class="px-5 py-4 text-gray-400 text-xs">
-                      ${new Date(s.terakhir_diperbarui).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                    <td class="px-5 py-4 font-semibold ${b.stok <= 5 ? "text-red-600" : "text-gray-700"}">
+                      ${b.stok}
                     </td>
+                    <td class="px-5 py-4">${badgeStok(b.stok)}</td>
                     <td class="px-5 py-4">
-                      <button
-                        hx-get="/admin/stok/edit/${s.id}"
-                        hx-target="#modal-edit-stok-content"
-                        hx-swap="innerHTML"
-                        onclick="document.getElementById('modal-edit-stok').classList.remove('hidden')"
-                        class="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">
-                        ✏️ Edit
-                      </button>
+                      <div class="flex items-center gap-2">
+                        <button
+                          hx-get="/admin/stok/edit/${b.id_barang}"
+                          hx-target="#modal-edit-stok-content"
+                          hx-swap="innerHTML"
+                          onclick="document.getElementById('modal-edit-stok').classList.remove('hidden')"
+                          class="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">
+                          ✏️ Edit
+                        </button>
+                        <button
+                          hx-post="/admin/stok/hapus/${b.id_barang}"
+                          hx-target="body"
+                          hx-confirm="Hapus ${b.nama}? Tindakan ini tidak bisa dibatalkan."
+                          class="text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition">
+                          🗑️ Hapus
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 `).join("")}
               </tbody>
             </table>
-            ${stok.length === 0 ? `
+            ${barang.length === 0 ? `
               <div class="text-center py-16 text-gray-400">
-                <p class="text-4xl mb-3">🥬</p>
-                <p class="font-medium">Belum ada bahan terdaftar</p>
+                <p class="text-4xl mb-3">📦</p>
+                <p class="font-medium">Belum ada barang terdaftar</p>
               </div>
             ` : ""}
           </div>
         </div>
       </div>
-
+ 
       <!-- Modal Tambah -->
       <div id="modal-tambah-stok" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
           <div class="flex items-center justify-between mb-5">
-            <h3 class="text-lg font-black">Tambah Bahan Baru</h3>
-            <button onclick="document.getElementById('modal-tambah-stok').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-xl">×</button>
+            <h3 class="text-lg font-black">Tambah Barang Baru</h3>
+            <button onclick="document.getElementById('modal-tambah-stok').classList.add('hidden')"
+              class="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
           </div>
           <form hx-post="/admin/stok/tambah" hx-target="body" class="space-y-4">
             <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Nama Bahan</label>
-              <input type="text" name="nama" required placeholder="cth: Gochujang" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
+              <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Nama Barang</label>
+              <input type="text" name="nama" required placeholder="cth: Seblak Original"
+                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Satuan</label>
-                <input type="text" name="satuan" required placeholder="cth: kg, pcs, liter" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Harga (Rp)</label>
+                <input type="number" name="harga" required min="0" placeholder="0"
+                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
               </div>
               <div>
                 <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Stok Awal</label>
-                <input type="number" name="stok_sekarang" required min="0" placeholder="0" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Stok Minimum</label>
-                <input type="number" name="stok_minimum" required min="0" placeholder="0" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Harga / Satuan</label>
-                <input type="number" name="harga_per_satuan" required min="0" placeholder="0" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
+                <input type="number" name="stok" required min="0" placeholder="0"
+                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
               </div>
             </div>
             <div class="flex gap-3 pt-2">
-              <button type="button" onclick="document.getElementById('modal-tambah-stok').classList.add('hidden')" class="flex-1 border border-gray-200 text-gray-600 font-bold py-2.5 rounded-xl text-sm hover:bg-gray-50 transition">Batal</button>
-              <button type="submit" class="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 rounded-xl text-sm transition">Simpan</button>
+              <button type="button"
+                onclick="document.getElementById('modal-tambah-stok').classList.add('hidden')"
+                class="flex-1 border border-gray-200 text-gray-600 font-bold py-2.5 rounded-xl text-sm hover:bg-gray-50 transition">
+                Batal
+              </button>
+              <button type="submit"
+                class="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 rounded-xl text-sm transition">
+                Simpan
+              </button>
             </div>
           </form>
         </div>
       </div>
-
+ 
       <!-- Modal Edit -->
       <div id="modal-edit-stok" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
           <div class="flex items-center justify-between mb-5">
-            <h3 class="text-lg font-black">Edit Stok Bahan</h3>
-            <button onclick="document.getElementById('modal-edit-stok').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-xl">×</button>
+            <h3 class="text-lg font-black">Edit Stok Barang</h3>
+            <button onclick="document.getElementById('modal-edit-stok').classList.add('hidden')"
+              class="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
           </div>
           <div id="modal-edit-stok-content">
             <p class="text-gray-400 text-sm text-center py-4">Memuat data...</p>
@@ -679,42 +690,45 @@ export const StokView = {
         </div>
       </div>
     `;
-
-    return AdminLayout("Stok Bahan", "stok", content);
+ 
+    return AdminLayout("Stok Barang", "stok", content);
   },
-
-  FormEditStok: (s: StokBahan) => `
-    <form hx-post="/admin/stok/update/${s.id}" hx-target="body" class="space-y-4">
+ 
+  // ----------------------------------------------------------
+  // Partial: Form edit yang diload via HTMX ke dalam modal
+  // ----------------------------------------------------------
+  FormEditStok: (b: Barang) => `
+    <form hx-post="/admin/stok/update/${b.id_barang}" hx-target="body" class="space-y-4">
       <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Nama Bahan</label>
-        <input type="text" name="nama" value="${s.nama}" required class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
+        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Nama Barang</label>
+        <input type="text" name="nama" value="${b.nama}" required
+          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
       </div>
       <div class="grid grid-cols-2 gap-3">
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Satuan</label>
-          <input type="text" name="satuan" value="${s.satuan}" required class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Harga (Rp)</label>
+          <input type="number" name="harga" value="${b.harga}" required min="0"
+            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
         </div>
         <div>
           <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Stok Sekarang</label>
-          <input type="number" name="stok_sekarang" value="${s.stok_sekarang}" required min="0" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
-        </div>
-      </div>
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Stok Minimum</label>
-          <input type="number" name="stok_minimum" value="${s.stok_minimum}" required min="0" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Harga / Satuan</label>
-          <input type="number" name="harga_per_satuan" value="${s.harga_per_satuan}" required min="0" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
+          <input type="number" name="stok" value="${b.stok}" required min="0"
+            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
         </div>
       </div>
       <div class="flex gap-3 pt-2">
-        <button type="button" onclick="document.getElementById('modal-edit-stok').classList.add('hidden')" class="flex-1 border border-gray-200 text-gray-600 font-bold py-2.5 rounded-xl text-sm hover:bg-gray-50 transition">Batal</button>
-        <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl text-sm transition">Update</button>
+        <button type="button"
+          onclick="document.getElementById('modal-edit-stok').classList.add('hidden')"
+          class="flex-1 border border-gray-200 text-gray-600 font-bold py-2.5 rounded-xl text-sm hover:bg-gray-50 transition">
+          Batal
+        </button>
+        <button type="submit"
+          class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl text-sm transition">
+          Update
+        </button>
       </div>
     </form>
-  `
+  `,
 };
 
 // ============================================================
