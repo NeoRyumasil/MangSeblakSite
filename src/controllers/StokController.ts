@@ -65,13 +65,19 @@ export const StokController = new Elysia({ prefix: "/admin/stok" })
   // ----------------------------------------------------------
   .post(
     "/tambah",
-    async ({ body, set }) => {
+    async ({ body }) => {
       await db.execute(
         `INSERT INTO barang (nama, harga, stok) VALUES (?, ?, ?)`,
         [body.nama, Number(body.harga), Number(body.stok)]
       );
 
-      set.redirect = "/admin/stok";
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: "/admin/stok",
+          "HX-Redirect": "/admin/stok",
+        },
+      });
     },
     {
       body: t.Object({
@@ -87,11 +93,16 @@ export const StokController = new Elysia({ prefix: "/admin/stok" })
   // ----------------------------------------------------------
   .post(
     "/update/:id",
-    async ({ params, body, set }) => {
+    async ({ params, body }) => {
       const id = Number(params.id);
       if (Number.isNaN(id)) {
-        set.redirect = "/admin/stok";
-        return;
+        return new Response(null, {
+          status: 302,
+          headers: {
+            Location: "/admin/stok",
+            "HX-Redirect": "/admin/stok",
+          },
+        });
       }
 
       await db.execute(
@@ -99,7 +110,13 @@ export const StokController = new Elysia({ prefix: "/admin/stok" })
         [body.nama, Number(body.harga), Number(body.stok), id]
       );
 
-      set.redirect = "/admin/stok";
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: "/admin/stok",
+          "HX-Redirect": "/admin/stok",
+        },
+      });
     },
     {
       body: t.Object({
@@ -113,13 +130,25 @@ export const StokController = new Elysia({ prefix: "/admin/stok" })
   // ----------------------------------------------------------
   // POST /admin/stok/hapus/:id — hapus barang
   // ----------------------------------------------------------
-  .post("/hapus/:id", async ({ params, set }) => {
+  .post("/hapus/:id", async ({ params }) => {
     const id = Number(params.id);
     if (Number.isNaN(id)) {
-      set.redirect = "/admin/stok";
-      return;
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: "/admin/stok",
+          "HX-Redirect": "/admin/stok",
+        },
+      });
     }
 
     await db.execute("DELETE FROM barang WHERE id_barang = ?", [id]);
-    set.redirect = "/admin/stok";
+    
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: "/admin/stok",
+        "HX-Redirect": "/admin/stok",
+      },
+    });
   });
