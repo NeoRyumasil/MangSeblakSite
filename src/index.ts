@@ -10,6 +10,8 @@ import { AdminView, StokView, KeuanganAdminView, StaffView } from "./views/pages
 import { StokController } from "./controllers/StokController";
 import { AuthController } from "./controllers/Auth/AuthController";
 import { StaffController } from "./controllers/StaffController";
+import { MenuController } from "./controllers/MenuController"; // Import MenuController baru
+import { MenuModel } from "./models/Menu"; // Import MenuModel
 
 // ============================================================
 // Dummy Data
@@ -91,6 +93,7 @@ const app = new Elysia()
   .use(AuthController)   // POST /auth/login, GET /auth/logout, POST /auth/register
   .use(StaffController)  // CRUD /admin/staff/*
   .use(StokController)   // CRUD /admin/stok/*
+  .use(MenuController)   // CRUD /admin/menu/* (Didaftarkan di sini)
 
   // ----------------------------------------------------------
   // Public
@@ -98,14 +101,19 @@ const app = new Elysia()
 
   .get("/", () => LandingView.HalamanUtama())
 
-  .get("/menu", () => MenuView.HalamanMenu([
-    { id_barang: 1, nama: "Seblak Original", harga: 16000 },
-    { id_barang: 2, nama: "Seblak Frozen", harga: 16000 },
-    { id_barang: 3, nama: "Seblak Cheese", harga: 18000 },
-    { id_barang: 4, nama: "Seblak Pedas Level 5", harga: 17000 },
-    { id_barang: 5, nama: "Es Teh Korea", harga: 8000 },
-    { id_barang: 6, nama: "Es Boba Gochujang", harga: 12000 },
-  ]))
+  // Mengambil data menu asli dari database
+  .get("/menu", async () => {
+    const menusDb = await MenuModel.getAll();
+
+    // Map data agar sesuai dengan struktur `ItemMenu` di MenuView
+    const formattedMenus = menusDb.map((menu) => ({
+      id_barang: menu.id_makanan,
+      nama: menu.nama_makanan,
+      harga: menu.harga,
+    }));
+
+    return MenuView.HalamanMenu(formattedMenus);
+  })
 
   // Menampilkan UI halaman login
   .get("/login", () => LoginView.HalamanLogin())
