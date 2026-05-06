@@ -1,3 +1,4 @@
+// file: views/pages/MenuPage.ts
 import { Footer } from "../components/Footer";
 import { Header } from "../components/Header";
 
@@ -5,13 +6,6 @@ type ItemMenu = {
   id_barang: number;
   nama: string;
   harga: number;
-};
-
-type ItemKeranjang = {
-  id_barang: number;
-  nama: string;
-  harga: number;
-  qty: number;
 };
 
 const MenuLayout = (title: string, content: string) => `
@@ -37,13 +31,10 @@ const MenuLayout = (title: string, content: string) => `
     </script>
   </head>
   <body class="bg-orange-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col pt-20">
-
     ${Header("menu")}
-
     <main class="flex-grow">
       ${content}
     </main>
-
     ${Footer()}
   </body>
   </html>
@@ -51,135 +42,94 @@ const MenuLayout = (title: string, content: string) => `
 
 export const MenuView = {
   HalamanMenu: (items: ItemMenu[]) => MenuLayout(
-    "Menu - Seblak Korea Mang Jay",
+    "Pesan Menu - Seblak Korea Mang Jay",
     `
-    <div class="max-w-6xl mx-auto p-6 py-10">
-      <div class="mb-10">
-        <h1 class="text-3xl font-bold text-red-600">Menu Kami 🍜</h1>
-        <p class="text-gray-500 mt-1">Pilih menu favoritmu dan tambahkan ke keranjang</p>
+    <div class="max-w-4xl mx-auto p-6 py-10">
+      
+      <!-- Banner Selamat Datang -->
+      <div class="bg-red-600 text-white rounded-2xl p-8 mb-8 text-center shadow-lg">
+        <h1 class="text-3xl font-bold mb-2">Selamat Datang di Seblak Korea Mang Jay! 🍜</h1>
+        <p class="text-red-100">Silakan pilih menu favoritmu dan lengkapi data pesanan di bawah ini.</p>
       </div>
 
-      <div class="flex flex-col lg:flex-row gap-8">
+      <!-- Form Utama Pemesanan -->
+      <form hx-post="/proses-pesanan" hx-swap="outerHTML" class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 bg-gray-50 p-6 rounded-xl border border-gray-200">
+          <!-- No Antrian (Otomatis) -->
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">No. Antrian</label>
+            <input type="text" name="no_antrian" id="no_antrian" readonly
+              class="w-full bg-gray-200 border border-gray-300 text-gray-600 rounded-xl px-4 py-3 font-bold cursor-not-allowed">
+            <p class="text-xs text-gray-400 mt-1">*Dibuat otomatis oleh sistem</p>
+          </div>
 
-        <!-- Grid Menu -->
-        <div class="lg:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Nama Pembeli -->
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Nama Pembeli <span class="text-red-500">*</span></label>
+            <input type="text" name="nama_pembeli" required placeholder="Masukkan nama Anda..."
+              class="w-full bg-white border border-gray-300 text-gray-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition">
+          </div>
+
+          <!-- Nomor Telepon Pembeli -->
+          <div class="md:col-span-2">
+            <label class="block text-sm font-bold text-gray-700 mb-2">Nomor Telepon (WhatsApp) <span class="text-red-500">*</span></label>
+            <input type="tel" name="no_hp" required placeholder="Contoh: 08123456789"
+              class="w-full bg-white border border-gray-300 text-gray-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition">
+          </div>
+        </div>
+
+        <hr class="mb-8 border-gray-100">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Pilih Menu</h2>
+
+        <!-- Card Menu -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           ${items.map(item => `
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
-              <div class="h-48 bg-orange-100 flex items-center justify-center text-5xl">
-                ${item.nama.includes('Es') ? '🥤' : '🍲'}
+            <div class="bg-orange-50 rounded-2xl border border-orange-100 overflow-hidden flex flex-col">
+              <div class="h-32 bg-orange-100 flex items-center justify-center text-5xl">
+                ${item.nama.toLowerCase().includes('es') || item.nama.toLowerCase().includes('minum') ? '🥤' : '🍲'}
               </div>
-              <div class="p-5">
-                <h3 class="text-xl font-bold mb-1">${item.nama}</h3>
-                <p class="text-red-600 font-bold text-lg mb-4">Rp ${item.harga.toLocaleString('id-ID')}</p>
+              <div class="p-5 flex-grow flex flex-col justify-between">
+                <div>
+                  <h3 class="text-xl font-bold mb-1">${item.nama}</h3>
+                  <p class="text-red-600 font-bold text-lg mb-4">Rp ${item.harga.toLocaleString('id-ID')}</p>
+                </div>
 
-                <button
-                  hx-post="/keranjang/tambah"
-                  hx-vals='{"id": "${item.id_barang}"}'
-                  hx-target="#keranjang-side"
-                  hx-swap="innerHTML"
-                  hx-indicator="#loading-${item.id_barang}"
-                  class="w-full bg-orange-500 hover:bg-orange-600 active:scale-95 text-white font-bold py-2 rounded-xl transition"
-                >
-                  <span id="loading-${item.id_barang}" class="htmx-indicator text-sm">⏳</span>
-                  + Tambah ke Keranjang
-                </button>
+                <!-- Kontrol Menambah Item -->
+                <div class="flex items-center justify-between bg-white rounded-xl p-2 border border-gray-200">
+                  <button type="button" onclick="updateQty(${item.id_barang}, -1)" class="w-10 h-10 rounded-lg bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-600 font-bold text-xl transition flex items-center justify-center">−</button>
+                  <input type="number" name="qty_${item.id_barang}" id="qty_${item.id_barang}" value="0" min="0" readonly class="w-12 text-center font-bold text-lg bg-transparent border-none outline-none">
+                  <button type="button" onclick="updateQty(${item.id_barang}, 1)" class="w-10 h-10 rounded-lg bg-orange-100 hover:bg-orange-200 text-orange-600 font-bold text-xl transition flex items-center justify-center">+</button>
+                </div>
               </div>
             </div>
           `).join('')}
         </div>
 
-        <!-- Keranjang Sidebar -->
-        <div class="lg:w-1/3">
-          <div
-            id="keranjang-side"
-            class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-24"
-            hx-get="/keranjang"
-            hx-trigger="load"
-            hx-swap="innerHTML"
-          >
-            <h2 class="text-xl font-bold mb-4">🛒 Keranjang Anda</h2>
-            <p class="text-gray-400 italic text-sm">Memuat keranjang...</p>
-          </div>
-        </div>
-
-      </div>
+        <!-- Tombol Submit -->
+        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 active:scale-95 text-white font-bold py-4 rounded-xl shadow-lg transition text-lg">
+          ✅ Buat Pesanan
+        </button>
+      </form>
     </div>
 
-    <style>
-      .htmx-indicator { display: none; }
-      .htmx-request .htmx-indicator { display: inline; }
-    </style>
+    <!-- Script untuk Generate Antrian dan Mengubah Kuantitas -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // Generate No Antrian: Angka Acak 1 - 999 (Format Integer untuk Database)
+        const antrianInt = Math.floor(1 + Math.random() * 999);
+        document.getElementById("no_antrian").value = antrianInt;
+      });
+
+      // Fungsi mengubah nilai di input saat tombol +/- diklik
+      function updateQty(id, delta) {
+        const input = document.getElementById('qty_' + id);
+        let currentVal = parseInt(input.value) || 0;
+        let newVal = currentVal + delta;
+        if (newVal < 0) newVal = 0; // Tidak boleh minus
+        input.value = newVal;
+      }
+    </script>
     `
-  ),
-
-  IsiKeranjang: (keranjang: ItemKeranjang[], total: number) => {
-    if (keranjang.length === 0) {
-      return `
-        <h2 class="text-xl font-bold mb-4">🛒 Keranjang Anda</h2>
-        <div class="text-center py-8">
-          <p class="text-4xl mb-3">🛒</p>
-          <p class="text-gray-400 italic text-sm">Keranjang masih kosong...</p>
-          <p class="text-gray-400 text-xs mt-1">Tambahkan menu favoritmu!</p>
-        </div>
-      `;
-    }
-
-    return `
-      <h2 class="text-xl font-bold mb-4">🛒 Keranjang Anda</h2>
-
-      <div class="space-y-3 mb-6">
-        ${keranjang.map(k => `
-          <div class="border-b pb-3">
-            <div class="flex justify-between items-start mb-2">
-              <p class="font-semibold text-sm flex-1 pr-2">${k.nama}</p>
-              <p class="font-bold text-sm text-red-600 whitespace-nowrap">
-                Rp ${(k.qty * k.harga).toLocaleString('id-ID')}
-              </p>
-            </div>
-            <div class="flex items-center justify-between">
-              <p class="text-xs text-gray-400">Rp ${k.harga.toLocaleString('id-ID')} / porsi</p>
-              <div class="flex items-center gap-2">
-                <button
-                  hx-post="/keranjang/kurang"
-                  hx-vals='{"id": "${k.id_barang}"}'
-                  hx-target="#keranjang-side"
-                  hx-swap="innerHTML"
-                  class="w-7 h-7 rounded-full bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-600 font-bold text-sm transition flex items-center justify-center"
-                >−</button>
-                <span class="font-bold text-sm w-4 text-center">${k.qty}</span>
-                <button
-                  hx-post="/keranjang/tambah"
-                  hx-vals='{"id": "${k.id_barang}"}'
-                  hx-target="#keranjang-side"
-                  hx-swap="innerHTML"
-                  class="w-7 h-7 rounded-full bg-orange-100 hover:bg-orange-200 text-orange-600 font-bold text-sm transition flex items-center justify-center"
-                >+</button>
-                <button
-                  hx-post="/keranjang/hapus"
-                  hx-vals='{"id": "${k.id_barang}"}'
-                  hx-target="#keranjang-side"
-                  hx-swap="innerHTML"
-                  class="w-7 h-7 rounded-full bg-gray-100 hover:bg-red-100 text-gray-400 hover:text-red-500 text-xs transition flex items-center justify-center"
-                  title="Hapus"
-                >🗑</button>
-              </div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-
-      <div class="flex justify-between items-center mb-6 pt-2 border-t-2 border-gray-100">
-        <span class="font-bold text-lg">Total</span>
-        <span class="font-bold text-xl text-red-600">Rp ${total.toLocaleString('id-ID')}</span>
-      </div>
-
-      <button
-        hx-post="/checkout"
-        hx-target="body"
-        class="w-full bg-green-600 hover:bg-green-700 active:scale-95 text-white font-bold py-3 rounded-xl shadow-lg transition"
-      >
-        ✅ Konfirmasi Pesanan
-      </button>
-    `;
-  }
+  )
 };
