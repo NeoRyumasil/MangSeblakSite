@@ -21,7 +21,6 @@ export const PesananController = new Elysia()
       const qty = Number(input[`qty_${menu.id_makanan}`]) || 0;
       if (qty > 0) {
         totalHarga += menu.harga * qty;
-        // Simpan detail item ke dalam array
         itemsSelected.push({
           id: menu.id_makanan,
           nama: menu.nama_makanan,
@@ -31,23 +30,20 @@ export const PesananController = new Elysia()
       }
     }
 
-    // Validasi jika belum ada makanan yang di-klik
     if (itemsSelected.length === 0) {
       return `<p class="text-red-500 font-bold text-center mt-10 p-5 bg-red-50 rounded-xl border border-red-200">Gagal. Anda belum menambahkan menu satupun ke pesanan.</p>`;
     }
 
     const noAntrianInt = parseInt(input.no_antrian) || 0;
 
-    // Simpan ke database menggunakan PesananModel
     await PesananModel.create({
       no_antrian: noAntrianInt,
       nama: input.nama_pembeli,
       no_hp: input.no_hp,
-      items: JSON.stringify(itemsSelected), // Konversi array items menjadi JSON string
+      items: JSON.stringify(itemsSelected),
       total_harga: totalHarga
     });
 
-    // Kembalikan tampilan sukses
     return `
       <div class="text-center bg-green-50 text-green-700 p-10 rounded-2xl border border-green-200 max-w-2xl mx-auto mt-10 shadow-sm">
         <div class="text-6xl mb-4">🎉</div>
@@ -64,9 +60,9 @@ export const PesananController = new Elysia()
   // GET /pesanan : Menampilkan halaman daftar pesanan (Admin/Dapur)
   // ----------------------------------------------------------
   .get("/pesanan", async () => {
+    // Ambil SEMUA pesanan dari database agar yang "Selesai" tidak hilang
     const semuaPesanan = await PesananModel.getAll();
     
-    // Filter yang belum selesai
     const pesananBelumSelesai = semuaPesanan.filter(p => p.status === 'Menunggu' || p.status === 'Diproses');
     
     const stats = {
@@ -76,12 +72,13 @@ export const PesananController = new Elysia()
       stok: 0 
     };
 
-    // Mapping agar sesuai dengan view PesananPage
-    const formattedPesanan = pesananBelumSelesai.map(p => ({
+    // Format data untuk dikirim ke view
+    const formattedPesanan = semuaPesanan.map(p => ({
       id: p.id_pesanan,
       no_antrian: p.no_antrian,
       nama_pelanggan: p.nama,
-      catatan: `HP: ${p.no_hp} | Status: ${p.status}`, 
+      catatan: `HP: ${p.no_hp}`, 
+      status: p.status, // Kirim status asli ke view
       items: p.items,
       total_harga: p.total_harga
     }));
@@ -96,6 +93,24 @@ export const PesananController = new Elysia()
     const id = Number(params.id);
     if (!isNaN(id)) {
       await PesananModel.updateStatus(id, 'Selesai');
+    }
+    
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: "/pesanan",
+        "HX-Redirect": "/pesanan",
+      },
+    });
+  })
+  
+  // ----------------------------------------------------------
+  // POST /admin/batal-selesaikan/:id : Mengembalikan pesanan ke Menunggu
+  // ----------------------------------------------------------
+  .post("/admin/batal-selesaikan/:id", async ({ params }) => {
+    const id = Number(params.id);
+    if (!isNaN(id)) {
+      await PesananModel.updateStatus(id, 'Menunggu');
     }
     
     return new Response(null, {
