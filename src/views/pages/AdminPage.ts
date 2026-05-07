@@ -1,3 +1,5 @@
+// file: views/pages/AdminPage.ts
+
 // ============================================================
 // Types
 // ============================================================
@@ -9,12 +11,15 @@ type Barang = {
   stok: number;
 };
 
-type RekapKeuanganRingkas = {
-  bulan: string;
-  total_pendapatan: number;
-  total_pengeluaran: number;
-  total_keuntungan: number;
-  total_pesanan: number;
+type Pesanan = {
+  id_pesanan: number;
+  no_antrian: number;
+  nama: string;
+  items: string;
+  total_harga: number;
+  status: string;
+  status_bayar: number;
+  no_hp: string;
 };
 
 type Staff = {
@@ -29,7 +34,7 @@ type Staff = {
 
 export type AdminDashboardData = {
   stok: Barang[];
-  keuangan: RekapKeuanganRingkas[];
+  pesanan: Pesanan[];
   staff: Staff[];
 };
 
@@ -47,9 +52,7 @@ const Sidebar = (activeTab: string) => `
       ${[
         { href: "/admin", icon: "📊", label: "Dashboard", key: "dashboard" },
         { href: "/pesanan", icon: "🧾", label: "Pesanan", key: "pesanan" },
-        { href: "/preorder", icon: "📦", label: "Preorder", key: "preorder" },
         { href: "/admin/stok", icon: "🥬", label: "Stok Bahan", key: "stok" },
-        { href: "/admin/keuangan", icon: "💰", label: "Keuangan", key: "keuangan" },
         { href: "/admin/staff", icon: "👥", label: "Manajemen Staff", key: "staff" },
         { href: "/menu", icon: "🍲", label: "Halaman Menu", key: "menu" },
       ].map(item => `
@@ -134,23 +137,22 @@ const badgeRole: Record<Staff["role"], string> = {
 };
 
 // ============================================================
-// ADMIN DASHBOARD — /admin (gabungan stok, keuangan, staff)
+// ADMIN DASHBOARD — /admin
 // ============================================================
 
 export const AdminView = {
   HalamanDashboard: (data: AdminDashboardData) => {
-    const { stok, keuangan, staff } = data;
+    const { stok, pesanan, staff } = data;
 
-    // Stok stats (Menggunakan threshold <= 5)
+    // Stok stats
     const stokHabis   = stok.filter(s => s.stok === 0).length;
     const stokHampir  = stok.filter(s => s.stok > 0 && s.stok <= 5).length;
     const stokAman    = stok.filter(s => s.stok > 5).length;
 
-    // Keuangan stats (bulan ini = index 0, bulan lalu = index 1)
-    const bulanIni   = keuangan[0];
-    const bulanLalu  = keuangan[1];
-    const totalPendapatanAll = keuangan.reduce((s, r) => s + r.total_pendapatan, 0);
-    const totalKeuntunganAll = keuangan.reduce((s, r) => s + r.total_keuntungan, 0);
+    // Pesanan stats
+    const totalPesananAll = pesanan.length;
+    const totalPendapatanAll = pesanan.reduce((sum, p) => sum + p.total_harga, 0);
+    const pesananSelesai = pesanan.filter(p => p.status === 'Selesai').length;
 
     // Staff stats
     const staffAktif = staff.filter(s => s.aktif).length;
@@ -158,18 +160,87 @@ export const AdminView = {
     const content = `
       <div class="py-6 space-y-10">
 
-        <!-- ================================================== -->
-        <!-- HEADER                                              -->
-        <!-- ================================================== -->
         <div>
           <p class="text-xs font-bold text-red-500 uppercase tracking-widest mb-1">Panel Admin</p>
           <h1 class="text-3xl font-black text-gray-900">Dashboard</h1>
-          <p class="text-sm text-gray-400 mt-1">Ringkasan stok, keuangan, dan SDM Mang Jay.</p>
+          <p class="text-sm text-gray-400 mt-1">Ringkasan stok, pesanan, dan SDM Mang Jay.</p>
         </div>
 
-        <!-- ================================================== -->
-        <!-- SECTION: STOK BAHAN                                 -->
-        <!-- ================================================== -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm border-l-4 border-orange-500">
+            <p class="text-sm font-bold text-gray-400 uppercase tracking-wide mb-1">Total Pesanan</p>
+            <p class="text-3xl font-black text-gray-800">${totalPesananAll}</p>
+          </div>
+          <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm border-l-4 border-green-500">
+            <p class="text-sm font-bold text-gray-400 uppercase tracking-wide mb-1">Pendapatan Kotor</p>
+            <p class="text-2xl font-black text-gray-800">Rp ${totalPendapatanAll.toLocaleString("id-ID")}</p>
+          </div>
+          <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm border-l-4 border-yellow-500">
+            <p class="text-sm font-bold text-gray-400 uppercase tracking-wide mb-1">Macam Barang Stok</p>
+            <p class="text-3xl font-black text-gray-800">${stok.length}</p>
+          </div>
+          <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm border-l-4 border-blue-500">
+            <p class="text-sm font-bold text-gray-400 uppercase tracking-wide mb-1">Total Staff Aktif</p>
+            <p class="text-3xl font-black text-gray-800">${staffAktif}</p>
+          </div>
+        </div>
+
+        <section>
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-0.5">Penjualan</p>
+              <h2 class="text-xl font-black text-gray-800">📦 Data Pesanan Terakhir</h2>
+            </div>
+            <a href="/pesanan" class="flex items-center gap-1 border border-gray-200 hover:border-red-400 text-gray-500 hover:text-red-600 px-4 py-2 rounded-xl font-semibold text-sm transition">
+              Lihat Semua Pesanan →
+            </a>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
+                  <tr>
+                    <th class="px-5 py-3">No Antrian</th>
+                    <th class="px-5 py-3">Nama Pembeli</th>
+                    <th class="px-5 py-3">Pesanan</th>
+                    <th class="px-5 py-3">Total Harga</th>
+                    <th class="px-5 py-3">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                  ${pesanan.slice(0, 5).map(p => {
+                    const isSelesai = p.status === 'Selesai';
+                    const itemsText = (() => {
+                      try {
+                        const parsed = JSON.parse(p.items);
+                        // FIXED: Removed the invalid \ escaping here!
+                        return parsed.map((i: any) => `${i.nama} (${i.qty})`).join(", ");
+                      } catch (e) {
+                        return p.items;
+                      }
+                    })();
+                    return `
+                      <tr class="hover:bg-orange-50/40 transition">
+                        <td class="px-5 py-3 font-bold text-gray-800">#${p.no_antrian}</td>
+                        <td class="px-5 py-3 font-semibold text-gray-800">${p.nama}</td>
+                        <td class="px-5 py-3 text-gray-600 text-xs truncate max-w-[200px]">${itemsText}</td>
+                        <td class="px-5 py-3 font-bold text-green-600">Rp ${p.total_harga.toLocaleString("id-ID")}</td>
+                        <td class="px-5 py-3">
+                          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${isSelesai ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">
+                            ${p.status}
+                          </span>
+                        </td>
+                      </tr>
+                    `;
+                  }).join("")}
+                  ${pesanan.length === 0 ? `<tr><td colspan="5" class="text-center py-6 text-gray-400">Belum ada pesanan masuk.</td></tr>` : ''}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
         <section>
           <div class="flex items-center justify-between mb-4">
             <div>
@@ -188,7 +259,6 @@ export const AdminView = {
             </div>
           </div>
 
-          <!-- Stat mini cards -->
           <div class="grid grid-cols-3 gap-4 mb-4">
             <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
               <p class="text-xs font-bold text-gray-400 uppercase mb-1">🟢 Aman</p>
@@ -204,7 +274,6 @@ export const AdminView = {
             </div>
           </div>
 
-          <!-- Tabel stok (max 5 baris, prioritas yang butuh perhatian) -->
           <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
               <table class="w-full text-left text-sm">
@@ -220,9 +289,7 @@ export const AdminView = {
                 <tbody class="divide-y divide-gray-50">
                   ${[...stok]
                     .sort((a, b) => {
-                      // Prioritaskan habis dulu, lalu hampir habis
-                      const score = (s: Barang) =>
-                        s.stok === 0 ? 0 : s.stok <= 5 ? 1 : 2;
+                      const score = (s: Barang) => s.stok === 0 ? 0 : s.stok <= 5 ? 1 : 2;
                       return score(a) - score(b);
                     })
                     .slice(0, 5)
@@ -252,115 +319,6 @@ export const AdminView = {
           </div>
         </section>
 
-        <!-- ================================================== -->
-        <!-- SECTION: KEUANGAN                                   -->
-        <!-- ================================================== -->
-        <section>
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-0.5">Laporan</p>
-              <h2 class="text-xl font-black text-gray-800">💰 Keuangan</h2>
-            </div>
-            <div class="flex gap-2">
-              <button onclick="window.print()" class="flex items-center gap-1 border border-gray-200 hover:border-gray-400 text-gray-500 px-4 py-2 rounded-xl font-semibold text-sm transition">
-                🖨️ Cetak
-              </button>
-              <a href="/admin/keuangan" class="flex items-center gap-1 border border-gray-200 hover:border-red-400 text-gray-500 hover:text-red-600 px-4 py-2 rounded-xl font-semibold text-sm transition">
-                Lihat Semua →
-              </a>
-            </div>
-          </div>
-
-          <!-- Stat mini cards -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-              <div class="flex items-center gap-3 mb-2">
-                <div class="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center">💰</div>
-                <p class="text-xs font-bold text-gray-400 uppercase">Total Pendapatan</p>
-              </div>
-              <p class="text-xl font-black">Rp ${totalPendapatanAll.toLocaleString("id-ID")}</p>
-              ${bulanIni ? `<p class="text-xs text-gray-400 mt-1">${bulanIni.bulan}: Rp ${bulanIni.total_pendapatan.toLocaleString("id-ID")}</p>` : ""}
-            </div>
-            <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-              <div class="flex items-center gap-3 mb-2">
-                <div class="w-9 h-9 bg-green-50 rounded-xl flex items-center justify-center">📈</div>
-                <p class="text-xs font-bold text-gray-400 uppercase">Total Keuntungan</p>
-              </div>
-              <p class="text-xl font-black text-green-600">Rp ${totalKeuntunganAll.toLocaleString("id-ID")}</p>
-              <p class="text-xs text-green-500 mt-1 font-semibold">
-                Margin ${totalPendapatanAll > 0 ? Math.round((totalKeuntunganAll / totalPendapatanAll) * 100) : 0}%
-              </p>
-            </div>
-            <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-              <div class="flex items-center gap-3 mb-2">
-                <div class="w-9 h-9 bg-orange-50 rounded-xl flex items-center justify-center">🍜</div>
-                <p class="text-xs font-bold text-gray-400 uppercase">Total Pesanan</p>
-              </div>
-              <p class="text-xl font-black">${keuangan.reduce((s, r) => s + r.total_pesanan, 0)}</p>
-              ${bulanIni ? `<p class="text-xs text-gray-400 mt-1">${bulanIni.bulan}: ${bulanIni.total_pesanan} pesanan</p>` : ""}
-            </div>
-          </div>
-
-          <!-- Tabel ringkasan per bulan -->
-          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-sm">
-                <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-                  <tr>
-                    <th class="px-5 py-3">Bulan</th>
-                    <th class="px-5 py-3">Pesanan</th>
-                    <th class="px-5 py-3">Pendapatan</th>
-                    <th class="px-5 py-3">Pengeluaran</th>
-                    <th class="px-5 py-3">Keuntungan</th>
-                    <th class="px-5 py-3">Margin</th>
-                    <th class="px-5 py-3">Detail</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                  ${keuangan.map(r => {
-                    const margin = r.total_pendapatan > 0 ? Math.round((r.total_keuntungan / r.total_pendapatan) * 100) : 0;
-                    const mc = margin >= 40 ? "text-green-600 bg-green-50" : margin >= 25 ? "text-yellow-600 bg-yellow-50" : "text-red-600 bg-red-50";
-                    return `
-                      <tr class="hover:bg-orange-50/40 transition">
-                        <td class="px-5 py-3 font-bold text-gray-800">${r.bulan}</td>
-                        <td class="px-5 py-3"><span class="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full text-xs font-bold">${r.total_pesanan}</span></td>
-                        <td class="px-5 py-3 font-semibold text-gray-800">Rp ${r.total_pendapatan.toLocaleString("id-ID")}</td>
-                        <td class="px-5 py-3 font-semibold text-red-600">Rp ${r.total_pengeluaran.toLocaleString("id-ID")}</td>
-                        <td class="px-5 py-3 font-bold text-green-600">Rp ${r.total_keuntungan.toLocaleString("id-ID")}</td>
-                        <td class="px-5 py-3"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${mc}">${margin}%</span></td>
-                        <td class="px-5 py-3">
-                          <a href="/admin/keuangan/${encodeURIComponent(r.bulan)}"
-                            class="text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition">
-                            Lihat →
-                          </a>
-                        </td>
-                      </tr>
-                    `;
-                  }).join("")}
-                </tbody>
-                <tfoot>
-                  <tr class="bg-gray-900 text-white">
-                    <td class="px-5 py-3 font-black">TOTAL</td>
-                    <td class="px-5 py-3 font-bold">${keuangan.reduce((s, r) => s + r.total_pesanan, 0)}</td>
-                    <td class="px-5 py-3 font-bold">Rp ${totalPendapatanAll.toLocaleString("id-ID")}</td>
-                    <td class="px-5 py-3 font-bold text-red-300">Rp ${keuangan.reduce((s, r) => s + r.total_pengeluaran, 0).toLocaleString("id-ID")}</td>
-                    <td class="px-5 py-3 font-bold text-green-400">Rp ${totalKeuntunganAll.toLocaleString("id-ID")}</td>
-                    <td class="px-5 py-3">
-                      <span class="bg-green-500 text-white px-2.5 py-1 rounded-full text-xs font-black">
-                        ${totalPendapatanAll > 0 ? Math.round((totalKeuntunganAll / totalPendapatanAll) * 100) : 0}%
-                      </span>
-                    </td>
-                    <td></td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- ================================================== -->
-        <!-- SECTION: STAFF                                      -->
-        <!-- ================================================== -->
         <section>
           <div class="flex items-center justify-between mb-4">
             <div>
@@ -378,7 +336,6 @@ export const AdminView = {
             </div>
           </div>
 
-          <!-- Stat mini cards -->
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
               <p class="text-xs font-bold text-gray-400 uppercase mb-1">Total</p>
@@ -402,7 +359,6 @@ export const AdminView = {
             </div>
           </div>
 
-          <!-- Tabel staff -->
           <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
               <table class="w-full text-left text-sm">
@@ -411,14 +367,12 @@ export const AdminView = {
                     <th class="px-5 py-3">Nama</th>
                     <th class="px-5 py-3">Username</th>
                     <th class="px-5 py-3">Role</th>
-                    <th class="px-5 py-3">No. HP</th>
-                    <th class="px-5 py-3">Bergabung</th>
                     <th class="px-5 py-3">Status</th>
                     <th class="px-5 py-3">Aksi</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
-                  ${staff.map(s => `
+                  ${staff.slice(0, 5).map(s => `
                     <tr class="hover:bg-orange-50/40 transition">
                       <td class="px-5 py-3">
                         <div class="flex items-center gap-3">
@@ -430,10 +384,6 @@ export const AdminView = {
                       </td>
                       <td class="px-5 py-3 text-gray-500 font-mono text-xs">${s.username}</td>
                       <td class="px-5 py-3">${badgeRole[s.role]}</td>
-                      <td class="px-5 py-3 text-gray-500">${s.no_hp}</td>
-                      <td class="px-5 py-3 text-gray-400 text-xs">
-                        ${new Date(s.tanggal_bergabung).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
-                      </td>
                       <td class="px-5 py-3">
                         ${s.aktif
                           ? `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">Aktif</span>`
@@ -441,37 +391,18 @@ export const AdminView = {
                         }
                       </td>
                       <td class="px-5 py-3">
-                        <div class="flex items-center gap-2">
-                          <a href="/admin/staff/edit/${s.id}"
-                            class="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">
-                            ✏️ Edit
-                          </a>
-                          <button
-                            hx-post="/admin/staff/${s.aktif ? "nonaktifkan" : "aktifkan"}/${s.id}"
-                            hx-target="body"
-                            hx-confirm="${s.aktif ? `Non-aktifkan ${s.nama}?` : `Aktifkan kembali ${s.nama}?`}"
-                            class="text-xs font-bold ${s.aktif ? "text-red-600 bg-red-50 hover:bg-red-100" : "text-green-600 bg-green-50 hover:bg-green-100"} px-3 py-1.5 rounded-lg transition">
-                            ${s.aktif ? "⛔ Non-aktifkan" : "✅ Aktifkan"}
-                          </button>
-                        </div>
+                        <a href="/admin/staff/edit/${s.id}" class="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">✏️ Edit</a>
                       </td>
                     </tr>
                   `).join("")}
                 </tbody>
               </table>
-              ${staff.length === 0 ? `
-                <div class="text-center py-12 text-gray-400">
-                  <p class="text-3xl mb-2">👥</p>
-                  <p class="font-medium">Belum ada staff terdaftar</p>
-                </div>
-              ` : ""}
             </div>
           </div>
         </section>
 
       </div>
 
-      <!-- Modal Tambah Barang -->
       <div id="modal-tambah-stok" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
           <div class="flex items-center justify-between mb-5">
@@ -501,7 +432,6 @@ export const AdminView = {
         </div>
       </div>
 
-      <!-- Modal Edit Stok -->
       <div id="modal-edit-stok" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
           <div class="flex items-center justify-between mb-5">
@@ -524,26 +454,13 @@ export const AdminView = {
 // ============================================================
 
 export const StokView = {
- 
-  // ----------------------------------------------------------
-  // Halaman utama /admin/stok
-  // ----------------------------------------------------------
   HalamanStok: (barang: Barang[]) => {
     const habis       = barang.filter(b => b.stok === 0).length;
-    const hampirHabis = barang.filter(b => b.stok > 0 && b.stok <= 5).length;  // threshold: ≤ 5
+    const hampirHabis = barang.filter(b => b.stok > 0 && b.stok <= 5).length;
     const aman        = barang.filter(b => b.stok > 5).length;
- 
-    const badgeStok = (stok: number) => {
-      if (stok === 0)
-        return `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">Habis</span>`;
-      if (stok <= 5)
-        return `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">Hampir Habis</span>`;
-      return `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">Aman</span>`;
-    };
  
     const content = `
       <div class="py-6">
-        <!-- Header -->
         <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
             <p class="text-xs font-bold text-red-500 uppercase tracking-widest mb-1">Inventaris</p>
@@ -556,7 +473,6 @@ export const StokView = {
           </button>
         </div>
  
-        <!-- Stat cards -->
         <div class="grid grid-cols-3 gap-4 mb-8">
           <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
             <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">🟢 Aman</p>
@@ -572,7 +488,6 @@ export const StokView = {
           </div>
         </div>
  
-        <!-- Tabel -->
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div class="p-5 border-b border-gray-50 flex items-center justify-between">
             <h2 class="font-black text-gray-800">Daftar Barang</h2>
@@ -635,7 +550,6 @@ export const StokView = {
         </div>
       </div>
  
-      <!-- Modal Tambah -->
       <div id="modal-tambah-stok" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
           <div class="flex items-center justify-between mb-5">
@@ -676,7 +590,6 @@ export const StokView = {
         </div>
       </div>
  
-      <!-- Modal Edit -->
       <div id="modal-edit-stok" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
           <div class="flex items-center justify-between mb-5">
@@ -694,9 +607,6 @@ export const StokView = {
     return AdminLayout("Stok Barang", "stok", content);
   },
  
-  // ----------------------------------------------------------
-  // Partial: Form edit yang diload via HTMX ke dalam modal
-  // ----------------------------------------------------------
   FormEditStok: (b: Barang) => `
     <form hx-post="/admin/stok/update/${b.id_barang}" hx-target="body" class="space-y-4">
       <div>
@@ -729,119 +639,6 @@ export const StokView = {
       </div>
     </form>
   `,
-};
-
-// ============================================================
-// KEUANGAN ADMIN VIEW — /admin/keuangan
-// ============================================================
-
-export const KeuanganAdminView = {
-  HalamanKeuangan: (rekaps: RekapKeuanganRingkas[]) => {
-    const totalPendapatan = rekaps.reduce((s, r) => s + r.total_pendapatan, 0);
-    const totalKeuntungan = rekaps.reduce((s, r) => s + r.total_keuntungan, 0);
-    const totalPesanan    = rekaps.reduce((s, r) => s + r.total_pesanan, 0);
-
-    const content = `
-      <div class="py-6">
-        <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-          <div>
-            <p class="text-xs font-bold text-red-500 uppercase tracking-widest mb-1">Laporan</p>
-            <h1 class="text-3xl font-black text-gray-900">Rekapitulasi Keuangan</h1>
-          </div>
-          <button onclick="window.print()" class="flex items-center gap-2 bg-white border border-gray-200 hover:border-red-400 text-gray-600 hover:text-red-600 px-4 py-2.5 rounded-xl font-semibold text-sm transition shadow-sm">
-            🖨️ Cetak
-          </button>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <div class="flex items-center gap-3 mb-3">
-              <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-xl">💰</div>
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">Total Pendapatan</p>
-            </div>
-            <p class="text-2xl font-black">Rp ${totalPendapatan.toLocaleString("id-ID")}</p>
-          </div>
-          <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <div class="flex items-center gap-3 mb-3">
-              <div class="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center text-xl">📈</div>
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">Total Keuntungan</p>
-            </div>
-            <p class="text-2xl font-black text-green-600">Rp ${totalKeuntungan.toLocaleString("id-ID")}</p>
-            <p class="text-xs text-green-500 mt-1 font-semibold">
-              Margin rata-rata ${totalPendapatan > 0 ? Math.round((totalKeuntungan / totalPendapatan) * 100) : 0}%
-            </p>
-          </div>
-          <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <div class="flex items-center gap-3 mb-3">
-              <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center text-xl">🍜</div>
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">Total Pesanan</p>
-            </div>
-            <p class="text-2xl font-black">${totalPesanan}</p>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div class="p-5 border-b border-gray-50">
-            <h2 class="font-black text-gray-800">Rincian Per Bulan</h2>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
-              <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-                <tr>
-                  <th class="px-5 py-4">Bulan</th>
-                  <th class="px-5 py-4">Pesanan</th>
-                  <th class="px-5 py-4">Pendapatan</th>
-                  <th class="px-5 py-4">Pengeluaran</th>
-                  <th class="px-5 py-4">Keuntungan</th>
-                  <th class="px-5 py-4">Margin</th>
-                  <th class="px-5 py-4">Detail</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-50">
-                ${rekaps.map(r => {
-                  const margin = r.total_pendapatan > 0 ? Math.round((r.total_keuntungan / r.total_pendapatan) * 100) : 0;
-                  const mc = margin >= 40 ? "text-green-600 bg-green-50" : margin >= 25 ? "text-yellow-600 bg-yellow-50" : "text-red-600 bg-red-50";
-                  return `
-                    <tr class="hover:bg-orange-50/40 transition">
-                      <td class="px-5 py-4 font-bold text-gray-800">${r.bulan}</td>
-                      <td class="px-5 py-4"><span class="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full text-xs font-bold">${r.total_pesanan}</span></td>
-                      <td class="px-5 py-4 font-semibold text-gray-800">Rp ${r.total_pendapatan.toLocaleString("id-ID")}</td>
-                      <td class="px-5 py-4 font-semibold text-red-600">Rp ${r.total_pengeluaran.toLocaleString("id-ID")}</td>
-                      <td class="px-5 py-4 font-bold text-green-600">Rp ${r.total_keuntungan.toLocaleString("id-ID")}</td>
-                      <td class="px-5 py-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${mc}">${margin}%</span></td>
-                      <td class="px-5 py-4">
-                        <a href="/admin/keuangan/${encodeURIComponent(r.bulan)}"
-                          class="text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition">
-                          Lihat →
-                        </a>
-                      </td>
-                    </tr>
-                  `;
-                }).join("")}
-              </tbody>
-              <tfoot>
-                <tr class="bg-gray-900 text-white">
-                  <td class="px-5 py-4 font-black">TOTAL</td>
-                  <td class="px-5 py-4 font-bold">${totalPesanan}</td>
-                  <td class="px-5 py-4 font-bold">Rp ${totalPendapatan.toLocaleString("id-ID")}</td>
-                  <td class="px-5 py-4 font-bold text-red-300">Rp ${rekaps.reduce((s, r) => s + r.total_pengeluaran, 0).toLocaleString("id-ID")}</td>
-                  <td class="px-5 py-4 font-bold text-green-400">Rp ${totalKeuntungan.toLocaleString("id-ID")}</td>
-                  <td class="px-5 py-4">
-                    <span class="bg-green-500 text-white px-2.5 py-1 rounded-full text-xs font-black">
-                      ${totalPendapatan > 0 ? Math.round((totalKeuntungan / totalPendapatan) * 100) : 0}%
-                    </span>
-                  </td>
-                  <td></td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </div>
-      </div>
-    `;
-
-    return AdminLayout("Keuangan", "keuangan", content);
-  }
 };
 
 // ============================================================

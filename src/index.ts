@@ -3,10 +3,8 @@ import { Elysia } from "elysia";
 import { html } from "@elysiajs/html";
 import { LandingView } from "./views/pages/LandingPage";
 import { MenuView } from "./views/pages/MenuPage";
-import { PreorderView } from "./views/pages/PreOrderPage";
-import { KeuanganView } from "./views/pages/KeuanganPage";
 import { LoginView } from "./views/pages/LoginPage";
-import { AdminView, KeuanganAdminView } from "./views/pages/AdminPage";
+import { AdminView } from "./views/pages/AdminPage";
 import { StokController } from "./controllers/StokController";
 import { AuthController } from "./controllers/Auth/AuthController";
 import { StaffController } from "./controllers/StaffController";
@@ -14,12 +12,10 @@ import { MenuController } from "./controllers/MenuController";
 import { PesananController } from "./controllers/PesananController";
 import { MenuModel } from "./models/Menu";
 
-// ============================================================
-// Dummy Data Admin
-// ============================================================
-const dummyStok = [ { id_barang: 1, nama: "Gochujang", stok: 5, harga: 85000 } ];
-const dummyKeuangan = [ { bulan: "April 2026", total_pendapatan: 7200000, total_pengeluaran: 4100000, total_keuntungan: 3100000, total_pesanan: 268 } ];
-const dummyStaff = [ { id: 1, nama: "Mang Jay", username: "mangjay", role: "admin" as const, no_hp: "081234", tanggal_bergabung: "2025", aktif: true } ];
+// Models Tambahan Untuk Backend Dashboard Admin
+import { StokModel } from "./models/Stok";
+import { PesananModel } from "./models/Pesanan";
+import { db } from "./models/Database";
 
 // ============================================================
 // App
@@ -50,7 +46,7 @@ const app = new Elysia()
   .use(StaffController)
   .use(StokController)
   .use(MenuController)
-  .use(PesananController) // Mengatur endpoint proses-pesanan dan pesanan
+  .use(PesananController) // Mengatur endpoint /proses-pesanan dan /pesanan
 
   // ----------------------------------------------------------
   // HALAMAN PUBLIK
@@ -72,20 +68,33 @@ const app = new Elysia()
   })
 
   // ----------------------------------------------------------
-  // HALAMAN PREORDER & ADMIN (DUMMY SEMENTARA)
+  // ADMIN DASHBOARD (TERKONEKSI KE DB)
   // ----------------------------------------------------------
-  .get("/preorder", () => PreorderView.HalamanPreorder([
-    {
-      id: 1, no_antrian: "001",
-      nama_pemesan: "Budi", nomor_pemesan: "0812",
-      alamat_pemesan: "Bandung", lat_pemesan: -6.9, lng_pemesan: 107.6,
-      items: [{ nama: "Seblak", qty: 2, harga: 16000 }],
-      total_harga: 32000, status_pembayaran: "lunas", status_pengantaran: "dikirim",
-    }
-  ]))
+  .get("/admin", async () => {
+    // 1. Fetch data stok asli
+    const stokDb = await StokModel.getAll();
 
-  .get("/admin", () => AdminView.HalamanDashboard({ stok: dummyStok, keuangan: dummyKeuangan, staff: dummyStaff }))
-  .get("/admin/keuangan", () => KeuanganAdminView.HalamanKeuangan(dummyKeuangan))
+    // 2. Fetch data pesanan asli
+    const pesananDb = await PesananModel.getAll();
+
+    // 3. Fetch data staff (users) menggunakan query DB
+    const staffQuery = await db.execute("SELECT id, nama, username, role, no_hp, tanggal_bergabung, aktif FROM users ORDER BY tanggal_bergabung DESC");
+    const staffDb = staffQuery.rows.map(row => ({
+      id: row.id as number,
+      nama: row.nama as string,
+      username: row.username as string,
+      role: row.role as "admin" | "kasir" | "dapur" | "kurir",
+      no_hp: row.no_hp as string,
+      tanggal_bergabung: row.tanggal_bergabung as string,
+      aktif: row.aktif === 1
+    }));
+
+    return AdminView.HalamanDashboard({ 
+      stok: stokDb, 
+      pesanan: pesananDb, 
+      staff: staffDb 
+    });
+  })
 
   // ----------------------------------------------------------
   // JALANKAN SERVER
