@@ -1,5 +1,65 @@
 // file: views/pages/PesananPage.ts
-import { Layout } from "../components/Layout";
+
+// ============================================================
+// Custom Layout Khusus Halaman Pesanan (Admin/Dapur)
+// ============================================================
+const PesananLayout = (title: string, content: string) => `
+  <!DOCTYPE html>
+  <html lang="id">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.11"></script>
+    <script>
+      tailwind.config = {
+        theme: { extend: { colors: { spicy: { 500: '#ef4444', 600: '#dc2626', 900: '#7f1d1d' } } } }
+      }
+    </script>
+    <style>
+      .htmx-indicator { display: none; }
+      .htmx-request .htmx-indicator { display: inline; }
+    </style>
+  </head>
+  <body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
+    
+    <nav class="bg-gray-900 text-white shadow-md sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center gap-6">
+            <a href="/" class="text-xl font-black text-white flex items-center gap-2 hover:text-red-400 transition">🍜 Mang Jay</a>
+            
+            <div class="hidden md:flex space-x-2">
+              <a href="/admin" class="text-white/60 hover:bg-white/10 hover:text-white px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+                📊 Dashboard Admin
+              </a>
+              <a href="/pesanan" class="bg-red-600 text-white shadow-lg shadow-red-900/30 px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+                🧾 Kelola Pesanan
+              </a>
+            </div>
+          </div>
+          
+          <div>
+            <a href="/logout" class="text-white/50 hover:text-red-400 text-sm font-semibold transition flex items-center gap-2">
+              <span>🚪</span> Keluar
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="md:hidden border-t border-white/10 px-4 py-3 flex gap-2 overflow-x-auto">
+        <a href="/admin" class="whitespace-nowrap text-white/60 hover:bg-white/10 px-4 py-2 rounded-lg text-xs font-semibold">📊 Dashboard Admin</a>
+        <a href="/pesanan" class="whitespace-nowrap bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-md">🧾 Kelola Pesanan</a>
+      </div>
+    </nav>
+
+    <main class="flex-1 w-full">
+      ${content}
+    </main>
+  </body>
+  </html>
+`;
 
 export const PesananView = {
   HalamanPesanan: (stats: any, pesananAktif: any[]) => {
@@ -17,7 +77,7 @@ export const PesananView = {
             <p class="text-2xl font-black">${stats.belum}</p>
           </div>
           <div class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-green-500">
-            <p class="text-sm text-gray-500 font-bold uppercase">Keuntungan</p>
+            <p class="text-sm text-gray-500 font-bold uppercase">Keuntungan Kotor</p>
             <p class="text-2xl font-black text-green-600">Rp ${stats.untung.toLocaleString('id-ID')}</p>
           </div>
           <div class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-red-500">
@@ -45,9 +105,15 @@ export const PesananView = {
               </thead>
               <tbody class="divide-y divide-gray-100">
                 ${pesananAktif.map((p: any) => {
-                  const items = JSON.parse(p.items);
-                  const detailItem = items.map((i: any) => `${i.nama} (x${i.qty})`).join(", ");
-                  const totalQty = items.reduce((sum: number, i: any) => sum + i.qty, 0);
+                  let detailItem = p.items;
+                  let totalQty = 0;
+                  try {
+                    const items = JSON.parse(p.items);
+                    detailItem = items.map((i: any) => `${i.nama} (x${i.qty})`).join(", ");
+                    totalQty = items.reduce((sum: number, i: any) => sum + i.qty, 0);
+                  } catch (e) {
+                    // Fallback apabila JSON gagal di-parse
+                  }
                   
                   // Variabel untuk mengecek apakah pesanan sudah selesai
                   const isSelesai = p.status === 'Selesai';
@@ -59,7 +125,7 @@ export const PesananView = {
                     : '<span class="inline-block mt-1 bg-yellow-100 text-yellow-800 text-[10px] uppercase font-bold px-2 py-1 rounded">Menunggu</span>';
 
                   // Membersihkan string "HP: " dari data catatan
-                  const noHpBersih = p.catatan.replace('HP: ', '').trim();
+                  const noHpBersih = p.catatan ? p.catatan.replace('HP: ', '').trim() : '-';
 
                   // Tombol aksi bergantung pada status
                   const tombolAksi = isSelesai 
@@ -82,7 +148,7 @@ export const PesananView = {
                       </td>
                       <td class="px-6 py-4 text-sm">
                         <p class="text-gray-700 font-medium ${isSelesai ? 'line-through decoration-2 decoration-gray-400' : ''}">${detailItem}</p>
-                        <p class="text-xs text-gray-400 font-bold mt-1">${totalQty} Barang</p>
+                        <p class="text-xs text-gray-400 font-bold mt-1">${totalQty > 0 ? `${totalQty} Barang` : ''}</p>
                       </td>
                       <td class="px-6 py-4 font-bold ${isSelesai ? 'text-gray-500' : 'text-red-600'} text-lg whitespace-nowrap">Rp ${p.total_harga.toLocaleString('id-ID')}</td>
                       <td class="px-6 py-4">
@@ -93,12 +159,12 @@ export const PesananView = {
                 }).join('')}
               </tbody>
             </table>
-            ${pesananAktif.length === 0 ? '<p class="p-10 text-center text-gray-400 italic">Tidak ada pesanan sama sekali.</p>' : ''}
+            ${pesananAktif.length === 0 ? '<p class="p-10 text-center text-gray-400 italic font-medium">Belum ada pesanan yang masuk.</p>' : ''}
           </div>
         </div>
       </div>
     `; 
 
-    return Layout("Dashboard Admin - Mang Jay", content);
+    return PesananLayout("Kelola Pesanan — Mang Jay Admin", content);
   }
 };

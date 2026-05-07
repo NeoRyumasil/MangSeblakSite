@@ -54,7 +54,6 @@ const Sidebar = (activeTab: string) => `
         { href: "/pesanan", icon: "🧾", label: "Pesanan", key: "pesanan" },
         { href: "/admin/stok", icon: "🥬", label: "Stok Bahan", key: "stok" },
         { href: "/admin/staff", icon: "👥", label: "Manajemen Staff", key: "staff" },
-        { href: "/menu", icon: "🍲", label: "Halaman Menu", key: "menu" },
       ].map(item => `
         <a href="${item.href}"
           class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition
