@@ -4,6 +4,9 @@ import { PesananModel } from "../models/Pesanan";
 import { MenuModel } from "../models/Menu";
 import { PesananView } from "../views/pages/PesananPage";
 
+// Variabel untuk menyimpan state antrian (mulai dari 0)
+let counterAntrian = 0;
+
 export const PesananController = new Elysia()
 
   // ----------------------------------------------------------
@@ -34,10 +37,12 @@ export const PesananController = new Elysia()
       return `<p class="text-red-500 font-bold text-center mt-10 p-5 bg-red-50 rounded-xl border border-red-200">Gagal. Anda belum menambahkan menu satupun ke pesanan.</p>`;
     }
 
-    const noAntrianInt = parseInt(input.no_antrian) || 0;
+    // Naikkan counter antrian setiap kali ada pesanan baru
+    counterAntrian += 1;
+    const noAntrianBaru = counterAntrian;
 
     await PesananModel.create({
-      no_antrian: noAntrianInt,
+      no_antrian: noAntrianBaru, // Menggunakan nomor urut dari server
       nama: input.nama_pembeli,
       no_hp: input.no_hp,
       items: JSON.stringify(itemsSelected),
@@ -49,7 +54,7 @@ export const PesananController = new Elysia()
         <div class="text-6xl mb-4">🎉</div>
         <h2 class="text-3xl font-bold mb-2">Pesanan Berhasil Dibuat!</h2>
         <p class="text-lg text-gray-700">Atas nama <strong class="text-green-800">${input.nama_pembeli}</strong> (HP: ${input.no_hp})</p>
-        <p class="text-lg text-gray-700">No. Antrian Anda: <strong class="text-green-800 text-2xl">${noAntrianInt}</strong></p>
+        <p class="text-lg text-gray-700">No. Antrian Anda: <strong class="text-green-800 text-2xl">${noAntrianBaru}</strong></p>
         <p class="mt-4 text-gray-600">Pesanan telah masuk ke sistem kami. Mohon tunggu panggilan dari Mang Jay ya!</p>
         <a href="/menu" class="inline-block mt-8 px-6 py-3 bg-green-600 text-white font-bold rounded-xl shadow hover:bg-green-700 transition">Kembali ke Menu</a>
       </div>
@@ -84,6 +89,21 @@ export const PesananController = new Elysia()
     }));
 
     return PesananView.HalamanPesanan(stats, formattedPesanan);
+  })
+
+  // ----------------------------------------------------------
+  // POST /admin/reset-antrian : Endpoint untuk mereset ke 0
+  // ----------------------------------------------------------
+  .post("/admin/reset-antrian", () => {
+    counterAntrian = 0; // Reset ke 0
+    
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: "/pesanan",
+        "HX-Redirect": "/pesanan",
+      },
+    });
   })
   
   // ----------------------------------------------------------

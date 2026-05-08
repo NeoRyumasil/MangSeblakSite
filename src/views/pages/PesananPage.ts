@@ -65,7 +65,13 @@ export const PesananView = {
   HalamanPesanan: (stats: any, pesananAktif: any[]) => {
     const content = `
       <div class="max-w-7xl mx-auto p-6">
-        <h1 class="text-3xl font-bold mb-8 text-gray-800">Riwayat Pesanan</h1>
+        
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <h1 class="text-3xl font-bold text-gray-800">Riwayat Pesanan</h1>
+          <button hx-post="/admin/reset-antrian" hx-target="body" hx-confirm="Apakah Anda yakin ingin mereset urutan nomor antrian kembali ke 1?" class="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-xl font-bold hover:bg-red-100 transition shadow-sm flex items-center gap-2">
+            🔄 Reset No. Antrian
+          </button>
+        </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           <div class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-blue-500">
