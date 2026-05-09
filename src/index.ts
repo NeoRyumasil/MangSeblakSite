@@ -15,7 +15,7 @@ import { MenuModel } from "./models/Menu";
 // Models Tambahan Untuk Backend Dashboard Admin
 import { StokModel } from "./models/Stok";
 import { PesananModel } from "./models/Pesanan";
-import { db } from "./models/Database";
+import { StaffModel } from "./models/Staff";
 
 // ============================================================
 // App
@@ -77,17 +77,8 @@ const app = new Elysia()
     // 2. Fetch data pesanan asli
     const pesananDb = await PesananModel.getAll();
 
-    // 3. Fetch data staff (users) menggunakan query DB
-    const staffQuery = await db.execute("SELECT id, nama, username, role, no_hp, tanggal_bergabung, aktif FROM users ORDER BY tanggal_bergabung DESC");
-    const staffDb = staffQuery.rows.map(row => ({
-      id: row.id as number,
-      nama: row.nama as string,
-      username: row.username as string,
-      role: row.role as "admin" | "kasir" | "dapur" | "kurir",
-      no_hp: row.no_hp as string,
-      tanggal_bergabung: row.tanggal_bergabung as string,
-      aktif: row.aktif === 1
-    }));
+    // 3. Fetch data staff (users) via StaffModel
+    const staffDb = await StaffModel.getAll();
 
     return AdminView.HalamanDashboard({ 
       stok: stokDb, 
