@@ -3,7 +3,7 @@ import { Elysia } from "elysia";
 import { PesananModel } from "../models/Pesanan";
 import { MenuModel } from "../models/Menu";
 import { StokModel } from "../models/Stok"; // Import StokModel untuk mengelola stok
-import { PesananView } from "../views/pages/PesananPage";
+import { PesananView } from "../views/pages/AdminPage";
 
 // Variabel untuk menyimpan state antrian (mulai dari 0)
 let counterAntrian = 0;

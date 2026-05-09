@@ -142,309 +142,167 @@ const badgeRole: Record<Staff["role"], string> = {
 export const AdminView = {
   HalamanDashboard: (data: AdminDashboardData) => {
     const { stok, pesanan, staff } = data;
-
-    // Stok stats
-    const stokHabis   = stok.filter(s => s.stok === 0).length;
-    const stokHampir  = stok.filter(s => s.stok > 0 && s.stok <= 5).length;
-    const stokAman    = stok.filter(s => s.stok > 5).length;
-
-    // Pesanan stats
+    const stokHabis = stok.filter(s => s.stok === 0).length;
+    const stokHampir = stok.filter(s => s.stok > 0 && s.stok <= 5).length;
+    const stokAman = stok.filter(s => s.stok > 5).length;
     const totalPesananAll = pesanan.length;
     const totalPendapatanAll = pesanan.reduce((sum, p) => sum + p.total_harga, 0);
-    const pesananSelesai = pesanan.filter(p => p.status === 'Selesai').length;
-
-    // Staff stats
     const staffAktif = staff.filter(s => s.aktif).length;
 
     const content = `
       <div class="py-6 space-y-10">
-
         <div>
           <p class="text-xs font-bold text-red-500 uppercase tracking-widest mb-1">Panel Admin</p>
           <h1 class="text-3xl font-black text-gray-900">Dashboard</h1>
           <p class="text-sm text-gray-400 mt-1">Ringkasan stok, pesanan, dan SDM Mang Jay.</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm border-l-4 border-orange-500">
-            <p class="text-sm font-bold text-gray-400 uppercase tracking-wide mb-1">Total Pesanan</p>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Total Pesanan</p>
             <p class="text-3xl font-black text-gray-800">${totalPesananAll}</p>
           </div>
           <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm border-l-4 border-green-500">
-            <p class="text-sm font-bold text-gray-400 uppercase tracking-wide mb-1">Pendapatan Kotor</p>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Pendapatan Kotor</p>
             <p class="text-2xl font-black text-gray-800">Rp ${totalPendapatanAll.toLocaleString("id-ID")}</p>
           </div>
           <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm border-l-4 border-yellow-500">
-            <p class="text-sm font-bold text-gray-400 uppercase tracking-wide mb-1">Macam Barang Stok</p>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Barang Stok</p>
             <p class="text-3xl font-black text-gray-800">${stok.length}</p>
           </div>
           <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm border-l-4 border-blue-500">
-            <p class="text-sm font-bold text-gray-400 uppercase tracking-wide mb-1">Total Staff Aktif</p>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Staff Aktif</p>
             <p class="text-3xl font-black text-gray-800">${staffAktif}</p>
           </div>
         </div>
 
         <section>
           <div class="flex items-center justify-between mb-4">
-            <div>
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-0.5">Penjualan</p>
-              <h2 class="text-xl font-black text-gray-800">📦 Data Pesanan Terakhir</h2>
-            </div>
-            <a href="/pesanan" class="flex items-center gap-1 border border-gray-200 hover:border-red-400 text-gray-500 hover:text-red-600 px-4 py-2 rounded-xl font-semibold text-sm transition">
-              Lihat Semua Pesanan →
-            </a>
+            <h2 class="text-xl font-black text-gray-800">📦 Pesanan Terakhir</h2>
+            <a href="/pesanan" class="text-red-600 font-bold text-sm hover:underline">Lihat Semua →</a>
           </div>
-
           <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-sm">
-                <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-                  <tr>
-                    <th class="px-5 py-3">No Antrian</th>
-                    <th class="px-5 py-3">Nama Pembeli</th>
-                    <th class="px-5 py-3">Pesanan</th>
-                    <th class="px-5 py-3">Total Harga</th>
-                    <th class="px-5 py-3">Status</th>
+            <table class="w-full text-left text-sm">
+              <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
+                <tr>
+                  <th class="px-5 py-3">No Antrian</th>
+                  <th class="px-5 py-3">Nama Pembeli</th>
+                  <th class="px-5 py-3">Total Harga</th>
+                  <th class="px-5 py-3">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-50">
+                ${pesanan.slice(0, 5).map(p => `
+                  <tr class="hover:bg-orange-50/40 transition">
+                    <td class="px-5 py-3 font-bold text-gray-800">#${p.no_antrian}</td>
+                    <td class="px-5 py-3 font-semibold text-gray-800">${p.nama}</td>
+                    <td class="px-5 py-3 font-bold text-green-600">Rp ${p.total_harga.toLocaleString("id-ID")}</td>
+                    <td class="px-5 py-3">
+                      <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${p.status === 'Selesai' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">
+                        ${p.status}
+                      </span>
+                    </td>
                   </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                  ${pesanan.slice(0, 5).map(p => {
-                    const isSelesai = p.status === 'Selesai';
-                    const itemsText = (() => {
-                      try {
-                        const parsed = JSON.parse(p.items);
-                        // FIXED: Removed the invalid \ escaping here!
-                        return parsed.map((i: any) => `${i.nama} (${i.qty})`).join(", ");
-                      } catch (e) {
-                        return p.items;
-                      }
-                    })();
-                    return `
-                      <tr class="hover:bg-orange-50/40 transition">
-                        <td class="px-5 py-3 font-bold text-gray-800">#${p.no_antrian}</td>
-                        <td class="px-5 py-3 font-semibold text-gray-800">${p.nama}</td>
-                        <td class="px-5 py-3 text-gray-600 text-xs truncate max-w-[200px]">${itemsText}</td>
-                        <td class="px-5 py-3 font-bold text-green-600">Rp ${p.total_harga.toLocaleString("id-ID")}</td>
-                        <td class="px-5 py-3">
-                          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${isSelesai ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">
-                            ${p.status}
-                          </span>
-                        </td>
-                      </tr>
-                    `;
-                  }).join("")}
-                  ${pesanan.length === 0 ? `<tr><td colspan="5" class="text-center py-6 text-gray-400">Belum ada pesanan masuk.</td></tr>` : ''}
-                </tbody>
-              </table>
-            </div>
+                `).join("")}
+              </tbody>
+            </table>
           </div>
         </section>
-
-        <section>
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-0.5">Inventaris</p>
-              <h2 class="text-xl font-black text-gray-800">🥬 Stok Barang</h2>
-            </div>
-            <div class="flex gap-2">
-              <button
-                onclick="document.getElementById('modal-tambah-stok').classList.remove('hidden')"
-                class="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl font-bold text-sm transition shadow-lg shadow-red-200">
-                + Tambah Barang
-              </button>
-              <a href="/admin/stok" class="flex items-center gap-1 border border-gray-200 hover:border-red-400 text-gray-500 hover:text-red-600 px-4 py-2 rounded-xl font-semibold text-sm transition">
-                Lihat Semua →
-              </a>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-3 gap-4 mb-4">
-            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
-              <p class="text-xs font-bold text-gray-400 uppercase mb-1">🟢 Aman</p>
-              <p class="text-2xl font-black text-green-600">${stokAman}</p>
-            </div>
-            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
-              <p class="text-xs font-bold text-gray-400 uppercase mb-1">🟡 Hampir Habis</p>
-              <p class="text-2xl font-black text-yellow-500">${stokHampir}</p>
-            </div>
-            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
-              <p class="text-xs font-bold text-gray-400 uppercase mb-1">🔴 Habis</p>
-              <p class="text-2xl font-black text-red-600">${stokHabis}</p>
-            </div>
-          </div>
-
-          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-sm">
-                <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-                  <tr>
-                    <th class="px-5 py-3">Nama Barang</th>
-                    <th class="px-5 py-3">Stok</th>
-                    <th class="px-5 py-3">Harga</th>
-                    <th class="px-5 py-3">Status</th>
-                    <th class="px-5 py-3">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                  ${[...stok]
-                    .sort((a, b) => {
-                      const score = (s: Barang) => s.stok === 0 ? 0 : s.stok <= 5 ? 1 : 2;
-                      return score(a) - score(b);
-                    })
-                    .slice(0, 5)
-                    .map(s => `
-                    <tr class="hover:bg-orange-50/40 transition">
-                      <td class="px-5 py-3 font-bold text-gray-800">${s.nama}</td>
-                      <td class="px-5 py-3 font-semibold ${s.stok <= 5 ? "text-red-600" : "text-gray-700"}">
-                        ${s.stok}
-                      </td>
-                      <td class="px-5 py-3 text-gray-500 text-xs">Rp ${s.harga.toLocaleString("id-ID")}</td>
-                      <td class="px-5 py-3">${badgeStok(s.stok)}</td>
-                      <td class="px-5 py-3">
-                        <button
-                          hx-get="/admin/stok/edit/${s.id_barang}"
-                          hx-target="#modal-edit-stok-content"
-                          hx-swap="innerHTML"
-                          onclick="document.getElementById('modal-edit-stok').classList.remove('hidden')"
-                          class="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">
-                          ✏️ Edit
-                        </button>
-                      </td>
-                    </tr>
-                  `).join("")}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <section>
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-0.5">SDM</p>
-              <h2 class="text-xl font-black text-gray-800">👥 Manajemen Staff</h2>
-            </div>
-            <div class="flex gap-2">
-              <a href="/admin/staff/registrasi"
-                class="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl font-bold text-sm transition shadow-lg shadow-red-200">
-                + Tambah Staff
-              </a>
-              <a href="/admin/staff" class="flex items-center gap-1 border border-gray-200 hover:border-red-400 text-gray-500 hover:text-red-600 px-4 py-2 rounded-xl font-semibold text-sm transition">
-                Lihat Semua →
-              </a>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
-              <p class="text-xs font-bold text-gray-400 uppercase mb-1">Total</p>
-              <p class="text-2xl font-black">${staff.length}</p>
-            </div>
-            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
-              <p class="text-xs font-bold text-gray-400 uppercase mb-1">✅ Aktif</p>
-              <p class="text-2xl font-black text-green-600">${staffAktif}</p>
-            </div>
-            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
-              <p class="text-xs font-bold text-gray-400 uppercase mb-1">⛔ Non-Aktif</p>
-              <p class="text-2xl font-black text-gray-400">${staff.length - staffAktif}</p>
-            </div>
-            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
-              <p class="text-xs font-bold text-gray-400 uppercase mb-1">🔑 Role</p>
-              <div class="flex flex-wrap justify-center gap-1 mt-1">
-                ${["admin","kasir","dapur","kurir"].map(r =>
-                  `<span class="text-xs font-bold text-gray-600">${staff.filter(s => s.role === r && s.aktif).length} ${r}</span>`
-                ).join(" · ")}
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-sm">
-                <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-                  <tr>
-                    <th class="px-5 py-3">Nama</th>
-                    <th class="px-5 py-3">Username</th>
-                    <th class="px-5 py-3">Role</th>
-                    <th class="px-5 py-3">Status</th>
-                    <th class="px-5 py-3">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                  ${staff.slice(0, 5).map(s => `
-                    <tr class="hover:bg-orange-50/40 transition">
-                      <td class="px-5 py-3">
-                        <div class="flex items-center gap-3">
-                          <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center font-black text-red-600 text-sm">
-                            ${s.nama.charAt(0).toUpperCase()}
-                          </div>
-                          <span class="font-bold text-gray-800">${s.nama}</span>
-                        </div>
-                      </td>
-                      <td class="px-5 py-3 text-gray-500 font-mono text-xs">${s.username}</td>
-                      <td class="px-5 py-3">${badgeRole[s.role]}</td>
-                      <td class="px-5 py-3">
-                        ${s.aktif
-                          ? `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">Aktif</span>`
-                          : `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-500">Non-Aktif</span>`
-                        }
-                      </td>
-                      <td class="px-5 py-3">
-                        <a href="/admin/staff/edit/${s.id}" class="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">✏️ Edit</a>
-                      </td>
-                    </tr>
-                  `).join("")}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-      </div>
-
-      <div id="modal-tambah-stok" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-          <div class="flex items-center justify-between mb-5">
-            <h3 class="text-lg font-black">Tambah Barang Baru</h3>
-            <button onclick="document.getElementById('modal-tambah-stok').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
-          </div>
-          <form hx-post="/admin/stok/tambah" hx-target="body" class="space-y-4">
-            <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Nama Barang</label>
-              <input type="text" name="nama" required placeholder="cth: Seblak Original" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Harga (Rp)</label>
-                <input type="number" name="harga" required min="0" placeholder="0" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Stok Awal</label>
-                <input type="number" name="stok" required min="0" placeholder="0" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
-              </div>
-            </div>
-            <div class="flex gap-3 pt-2">
-              <button type="button" onclick="document.getElementById('modal-tambah-stok').classList.add('hidden')" class="flex-1 border border-gray-200 text-gray-600 font-bold py-2.5 rounded-xl text-sm hover:bg-gray-50 transition">Batal</button>
-              <button type="submit" class="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 rounded-xl text-sm transition">Simpan</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <div id="modal-edit-stok" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-          <div class="flex items-center justify-between mb-5">
-            <h3 class="text-lg font-black">Edit Barang</h3>
-            <button onclick="document.getElementById('modal-edit-stok').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
-          </div>
-          <div id="modal-edit-stok-content">
-            <p class="text-gray-400 text-sm text-center py-4">Memuat data...</p>
-          </div>
-        </div>
       </div>
     `;
-
     return AdminLayout("Dashboard", "dashboard", content);
+  }
+};
+
+// ============================================================
+// PESANAN VIEW — /pesanan
+// ============================================================
+
+export const PesananView = {
+  HalamanPesanan: (stats: any, pesananAktif: any[]) => {
+    const content = `
+      <div class="py-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <div>
+            <p class="text-xs font-bold text-red-500 uppercase tracking-widest mb-1">Penjualan</p>
+            <h1 class="text-3xl font-black text-gray-900">Kelola Pesanan</h1>
+          </div>
+          <button hx-post="/admin/reset-antrian" hx-target="body" hx-confirm="Reset urutan antrian ke 1?" class="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-xl font-bold hover:bg-red-100 transition shadow-sm flex items-center gap-2">
+            🔄 Reset No. Antrian
+          </button>
+        </div>
+        
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-blue-500">
+            <p class="text-xs text-gray-400 font-bold uppercase mb-1">Total</p>
+            <p class="text-3xl font-black">${stats.total}</p>
+          </div>
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-yellow-500">
+            <p class="text-xs text-gray-400 font-bold uppercase mb-1">Menunggu</p>
+            <p class="text-3xl font-black">${stats.belum}</p>
+          </div>
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-green-500">
+            <p class="text-xs text-gray-400 font-bold uppercase mb-1">Pendapatan</p>
+            <p class="text-2xl font-black text-green-600">Rp ${stats.untung.toLocaleString('id-ID')}</p>
+          </div>
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-red-500">
+            <p class="text-xs text-gray-400 font-bold uppercase mb-1">Sisa Stok</p>
+            <p class="text-2xl font-black">${stats.stok} Porsi</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
+          <div class="p-5 border-b border-gray-50 flex justify-between items-center">
+            <h2 class="text-lg font-black text-gray-800">Daftar Antrian</h2>
+            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">${pesananAktif.length} Antrian</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
+                <tr>
+                  <th class="px-5 py-4">No</th>
+                  <th class="px-5 py-4">Pemesan</th>
+                  <th class="px-5 py-4">Pesanan</th>
+                  <th class="px-5 py-4">Total</th>
+                  <th class="px-5 py-4">Aksi</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-50">
+                ${pesananAktif.map((p: any) => {
+                  let detailItem = "-";
+                  try {
+                    const items = JSON.parse(p.items);
+                    detailItem = items.map((i: any) => `${i.nama} (x${i.qty})`).join(", ");
+                  } catch (e) {}
+                  
+                  const isSelesai = p.status === 'Selesai';
+                  return `
+                    <tr class="${isSelesai ? 'bg-gray-50 opacity-60' : 'hover:bg-orange-50/40 transition bg-white'}">
+                      <td class="px-5 py-4 font-black text-lg ${isSelesai ? 'text-gray-400' : 'text-gray-800'}">#${p.no_antrian}</td>
+                      <td class="px-5 py-4">
+                        <p class="font-bold text-gray-800">${p.nama_pelanggan}</p>
+                        <p class="text-[10px] font-mono text-gray-400 uppercase">${p.catatan}</p>
+                      </td>
+                      <td class="px-5 py-4 text-xs">
+                        <p class="text-gray-700 font-semibold ${isSelesai ? 'line-through' : ''}">${detailItem}</p>
+                      </td>
+                      <td class="px-5 py-4 font-bold ${isSelesai ? 'text-gray-500' : 'text-green-600'} text-sm whitespace-nowrap">Rp ${p.total_harga.toLocaleString('id-ID')}</td>
+                      <td class="px-5 py-4">
+                        ${isSelesai 
+                          ? `<button hx-post="/admin/batal-selesaikan/${p.id}" hx-target="body" class="bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase transition">Batal</button>`
+                          : `<button hx-post="/admin/selesaikan/${p.id}" hx-target="body" class="bg-green-600 text-white px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase shadow-sm transition">✅ Selesai</button>`
+                        }
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `; 
+    return AdminLayout("Kelola Pesanan", "pesanan", content);
   }
 };
 
@@ -454,9 +312,9 @@ export const AdminView = {
 
 export const StokView = {
   HalamanStok: (barang: Barang[]) => {
-    const habis       = barang.filter(b => b.stok === 0).length;
+    const habis = barang.filter(b => b.stok === 0).length;
     const hampirHabis = barang.filter(b => b.stok > 0 && b.stok <= 5).length;
-    const aman        = barang.filter(b => b.stok > 5).length;
+    const aman = barang.filter(b => b.stok > 5).length;
  
     const content = `
       <div class="py-6">
@@ -465,177 +323,79 @@ export const StokView = {
             <p class="text-xs font-bold text-red-500 uppercase tracking-widest mb-1">Inventaris</p>
             <h1 class="text-3xl font-black text-gray-900">Stok Barang</h1>
           </div>
-          <button
-            onclick="document.getElementById('modal-tambah-stok').classList.remove('hidden')"
-            class="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-lg shadow-red-200">
+          <button onclick="document.getElementById('modal-tambah-stok').classList.remove('hidden')" class="bg-red-600 hover:bg-red-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-lg">
             + Tambah Barang
           </button>
         </div>
  
         <div class="grid grid-cols-3 gap-4 mb-8">
-          <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">🟢 Aman</p>
-            <p class="text-3xl font-black text-green-600">${aman}</p>
-          </div>
-          <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">🟡 Hampir Habis</p>
-            <p class="text-3xl font-black text-yellow-500">${hampirHabis}</p>
-          </div>
-          <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">🔴 Habis</p>
-            <p class="text-3xl font-black text-red-600">${habis}</p>
-          </div>
+          <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm text-center"><p class="text-xs font-bold text-green-600 uppercase mb-1">🟢 Aman</p><p class="text-3xl font-black">${aman}</p></div>
+          <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm text-center"><p class="text-xs font-bold text-yellow-500 uppercase mb-1">🟡 Menipis</p><p class="text-3xl font-black">${hampirHabis}</p></div>
+          <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm text-center"><p class="text-xs font-bold text-red-600 uppercase mb-1">🔴 Habis</p><p class="text-3xl font-black">${habis}</p></div>
         </div>
  
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div class="p-5 border-b border-gray-50 flex items-center justify-between">
-            <h2 class="font-black text-gray-800">Daftar Barang</h2>
-            <span class="text-xs text-gray-400">${barang.length} barang terdaftar</span>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
-              <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-                <tr>
-                  <th class="px-5 py-4">#</th>
-                  <th class="px-5 py-4">Nama Barang</th>
-                  <th class="px-5 py-4">Harga</th>
-                  <th class="px-5 py-4">Stok</th>
-                  <th class="px-5 py-4">Status</th>
-                  <th class="px-5 py-4">Aksi</th>
+          <table class="w-full text-left text-sm">
+            <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
+              <tr>
+                <th class="px-5 py-4">Nama Barang</th>
+                <th class="px-5 py-4">Harga</th>
+                <th class="px-5 py-4">Stok</th>
+                <th class="px-5 py-4">Status</th>
+                <th class="px-5 py-4">Aksi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+              ${barang.map(b => `
+                <tr class="hover:bg-orange-50/40 transition">
+                  <td class="px-5 py-4 font-bold text-gray-800">${b.nama}</td>
+                  <td class="px-5 py-4 text-gray-700">Rp ${b.harga.toLocaleString("id-ID")}</td>
+                  <td class="px-5 py-4 font-semibold ${b.stok <= 5 ? "text-red-600" : "text-gray-700"}">${b.stok}</td>
+                  <td class="px-5 py-4">${badgeStok(b.stok)}</td>
+                  <td class="px-5 py-4">
+                    <button hx-get="/admin/stok/edit/${b.id_barang}" hx-target="#modal-edit-stok-content" hx-swap="innerHTML" onclick="document.getElementById('modal-edit-stok').classList.remove('hidden')" class="text-[10px] font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg uppercase">Edit</button>
+                    <button hx-post="/admin/stok/hapus/${b.id_barang}" hx-target="body" hx-confirm="Hapus ${b.nama}?" class="text-[10px] font-bold text-red-600 bg-red-50 px-3 py-1.5 rounded-lg uppercase">Hapus</button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-50">
-                ${barang.map(b => `
-                  <tr class="hover:bg-orange-50/40 transition">
-                    <td class="px-5 py-4 text-gray-400 text-xs font-mono">${b.id_barang}</td>
-                    <td class="px-5 py-4 font-bold text-gray-800">${b.nama}</td>
-                    <td class="px-5 py-4 text-gray-700 font-semibold">
-                      Rp ${b.harga.toLocaleString("id-ID")}
-                    </td>
-                    <td class="px-5 py-4 font-semibold ${b.stok <= 5 ? "text-red-600" : "text-gray-700"}">
-                      ${b.stok}
-                    </td>
-                    <td class="px-5 py-4">${badgeStok(b.stok)}</td>
-                    <td class="px-5 py-4">
-                      <div class="flex items-center gap-2">
-                        <button
-                          hx-get="/admin/stok/edit/${b.id_barang}"
-                          hx-target="#modal-edit-stok-content"
-                          hx-swap="innerHTML"
-                          onclick="document.getElementById('modal-edit-stok').classList.remove('hidden')"
-                          class="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">
-                          ✏️ Edit
-                        </button>
-                        <button
-                          hx-post="/admin/stok/hapus/${b.id_barang}"
-                          hx-target="body"
-                          hx-confirm="Hapus ${b.nama}? Tindakan ini tidak bisa dibatalkan."
-                          class="text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition">
-                          🗑️ Hapus
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                `).join("")}
-              </tbody>
-            </table>
-            ${barang.length === 0 ? `
-              <div class="text-center py-16 text-gray-400">
-                <p class="text-4xl mb-3">📦</p>
-                <p class="font-medium">Belum ada barang terdaftar</p>
-              </div>
-            ` : ""}
-          </div>
+              `).join("")}
+            </tbody>
+          </table>
         </div>
       </div>
- 
       <div id="modal-tambah-stok" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
           <div class="flex items-center justify-between mb-5">
             <h3 class="text-lg font-black">Tambah Barang Baru</h3>
-            <button onclick="document.getElementById('modal-tambah-stok').classList.add('hidden')"
-              class="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+            <button onclick="document.getElementById('modal-tambah-stok').classList.add('hidden')" class="text-gray-400 text-xl leading-none">×</button>
           </div>
           <form hx-post="/admin/stok/tambah" hx-target="body" class="space-y-4">
-            <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Nama Barang</label>
-              <input type="text" name="nama" required placeholder="cth: Seblak Original"
-                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
-            </div>
+            <input type="text" name="nama" required placeholder="Nama Barang" class="w-full border rounded-xl px-4 py-2.5 text-sm focus:border-red-400 outline-none"/>
             <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Harga (Rp)</label>
-                <input type="number" name="harga" required min="0" placeholder="0"
-                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Stok Awal</label>
-                <input type="number" name="stok" required min="0" placeholder="0"
-                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
-              </div>
+              <input type="number" name="harga" required placeholder="Harga" class="w-full border rounded-xl px-4 py-2.5 text-sm outline-none"/>
+              <input type="number" name="stok" required placeholder="Stok" class="w-full border rounded-xl px-4 py-2.5 text-sm outline-none"/>
             </div>
-            <div class="flex gap-3 pt-2">
-              <button type="button"
-                onclick="document.getElementById('modal-tambah-stok').classList.add('hidden')"
-                class="flex-1 border border-gray-200 text-gray-600 font-bold py-2.5 rounded-xl text-sm hover:bg-gray-50 transition">
-                Batal
-              </button>
-              <button type="submit"
-                class="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 rounded-xl text-sm transition">
-                Simpan
-              </button>
-            </div>
+            <button type="submit" class="w-full bg-red-600 text-white font-bold py-2.5 rounded-xl transition">Simpan Barang</button>
           </form>
         </div>
       </div>
- 
       <div id="modal-edit-stok" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-          <div class="flex items-center justify-between mb-5">
-            <h3 class="text-lg font-black">Edit Stok Barang</h3>
-            <button onclick="document.getElementById('modal-edit-stok').classList.add('hidden')"
-              class="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
-          </div>
-          <div id="modal-edit-stok-content">
-            <p class="text-gray-400 text-sm text-center py-4">Memuat data...</p>
-          </div>
+          <div class="flex items-center justify-between mb-5"><h3 class="text-lg font-black">Edit Stok</h3><button onclick="document.getElementById('modal-edit-stok').classList.add('hidden')" class="text-gray-400 text-xl">×</button></div>
+          <div id="modal-edit-stok-content"><p class="text-center py-4 text-gray-400">Memuat...</p></div>
         </div>
       </div>
     `;
- 
     return AdminLayout("Stok Barang", "stok", content);
   },
  
   FormEditStok: (b: Barang) => `
     <form hx-post="/admin/stok/update/${b.id_barang}" hx-target="body" class="space-y-4">
-      <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Nama Barang</label>
-        <input type="text" name="nama" value="${b.nama}" required
-          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
-      </div>
+      <input type="text" name="nama" value="${b.nama}" required class="w-full border rounded-xl px-4 py-2.5 text-sm"/>
       <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Harga (Rp)</label>
-          <input type="number" name="harga" value="${b.harga}" required min="0"
-            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Stok Sekarang</label>
-          <input type="number" name="stok" value="${b.stok}" required min="0"
-            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"/>
-        </div>
+        <input type="number" name="harga" value="${b.harga}" required class="w-full border rounded-xl px-4 py-2.5 text-sm"/>
+        <input type="number" name="stok" value="${b.stok}" required class="w-full border rounded-xl px-4 py-2.5 text-sm"/>
       </div>
-      <div class="flex gap-3 pt-2">
-        <button type="button"
-          onclick="document.getElementById('modal-edit-stok').classList.add('hidden')"
-          class="flex-1 border border-gray-200 text-gray-600 font-bold py-2.5 rounded-xl text-sm hover:bg-gray-50 transition">
-          Batal
-        </button>
-        <button type="submit"
-          class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl text-sm transition">
-          Update
-        </button>
-      </div>
+      <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl">Update Stok</button>
     </form>
   `,
 };
@@ -647,272 +407,77 @@ export const StokView = {
 export const StaffView = {
   HalamanStaff: (staff: Staff[]) => {
     const aktif = staff.filter(s => s.aktif).length;
-
     const content = `
       <div class="py-6">
         <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-          <div>
-            <p class="text-xs font-bold text-red-500 uppercase tracking-widest mb-1">Sumber Daya Manusia</p>
-            <h1 class="text-3xl font-black text-gray-900">Manajemen Staff</h1>
-          </div>
-          <a href="/admin/staff/registrasi"
-            class="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-lg shadow-red-200">
-            + Tambah Staff
-          </a>
+          <div><p class="text-xs font-bold text-red-500 uppercase tracking-widest mb-1">SDM</p><h1 class="text-3xl font-black text-gray-900">Staff Mang Jay</h1></div>
+          <a href="/admin/staff/registrasi" class="bg-red-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg">Tambah Staff</a>
         </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <p class="text-xs font-bold text-gray-400 uppercase mb-2">Total Staff</p>
-            <p class="text-3xl font-black">${staff.length}</p>
-          </div>
-          <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <p class="text-xs font-bold text-gray-400 uppercase mb-2">✅ Aktif</p>
-            <p class="text-3xl font-black text-green-600">${aktif}</p>
-          </div>
-          <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <p class="text-xs font-bold text-gray-400 uppercase mb-2">⛔ Non-Aktif</p>
-            <p class="text-3xl font-black text-gray-400">${staff.length - aktif}</p>
-          </div>
-          <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-            <p class="text-xs font-bold text-gray-400 uppercase mb-2">🔑 Role Aktif</p>
-            <div class="flex flex-wrap gap-1 mt-1">
-              ${["admin","kasir","dapur","kurir"].map(r =>
-                `<span class="text-xs font-bold text-gray-600">${staff.filter(s => s.role === r && s.aktif).length} ${r}</span>`
-              ).join(" · ")}
-            </div>
-          </div>
-        </div>
-
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div class="p-5 border-b border-gray-50">
-            <h2 class="font-black text-gray-800">Daftar Staff</h2>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
-              <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-                <tr>
-                  <th class="px-5 py-4">Nama</th>
-                  <th class="px-5 py-4">Username</th>
-                  <th class="px-5 py-4">Role</th>
-                  <th class="px-5 py-4">No. HP</th>
-                  <th class="px-5 py-4">Bergabung</th>
-                  <th class="px-5 py-4">Status</th>
-                  <th class="px-5 py-4">Aksi</th>
+          <table class="w-full text-left text-sm">
+            <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
+              <tr><th class="px-5 py-4">Nama</th><th class="px-5 py-4">Role</th><th class="px-5 py-4">Status</th><th class="px-5 py-4">Aksi</th></tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+              ${staff.map(s => `
+                <tr class="hover:bg-orange-50/40 transition">
+                  <td class="px-5 py-4"><span class="font-bold text-gray-800">${s.nama}</span><br/><span class="text-[10px] text-gray-400 font-mono">${s.username}</span></td>
+                  <td class="px-5 py-4">${badgeRole[s.role]}</td>
+                  <td class="px-5 py-4">${s.aktif ? '<span class="text-green-600 font-bold">Aktif</span>' : '<span class="text-gray-400">Non-aktif</span>'}</td>
+                  <td class="px-5 py-4 flex gap-2">
+                    <a href="/admin/staff/edit/${s.id}" class="text-[10px] font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg uppercase">Edit</a>
+                    <button hx-post="/admin/staff/${s.aktif ? "nonaktifkan" : "aktifkan"}/${s.id}" hx-target="body" class="text-[10px] font-bold ${s.aktif ? 'text-red-600 bg-red-50' : 'text-green-600 bg-green-50'} px-3 py-1.5 rounded-lg uppercase">${s.aktif ? 'Nonaktifkan' : 'Aktifkan'}</button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-50">
-                ${staff.map(s => `
-                  <tr class="hover:bg-orange-50/40 transition">
-                    <td class="px-5 py-4">
-                      <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-red-100 flex items-center justify-center font-black text-red-600 text-sm">
-                          ${s.nama.charAt(0).toUpperCase()}
-                        </div>
-                        <span class="font-bold text-gray-800">${s.nama}</span>
-                      </div>
-                    </td>
-                    <td class="px-5 py-4 text-gray-500 font-mono text-xs">${s.username}</td>
-                    <td class="px-5 py-4">${badgeRole[s.role]}</td>
-                    <td class="px-5 py-4 text-gray-500">${s.no_hp}</td>
-                    <td class="px-5 py-4 text-gray-400 text-xs">
-                      ${new Date(s.tanggal_bergabung).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
-                    </td>
-                    <td class="px-5 py-4">
-                      ${s.aktif
-                        ? `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">Aktif</span>`
-                        : `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-500">Non-Aktif</span>`
-                      }
-                    </td>
-                    <td class="px-5 py-4">
-                      <div class="flex items-center gap-2">
-                        <a href="/admin/staff/edit/${s.id}"
-                          class="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">
-                          ✏️ Edit
-                        </a>
-                        <button
-                          hx-post="/admin/staff/${s.aktif ? "nonaktifkan" : "aktifkan"}/${s.id}"
-                          hx-target="body"
-                          hx-confirm="${s.aktif ? `Non-aktifkan ${s.nama}?` : `Aktifkan kembali ${s.nama}?`}"
-                          class="text-xs font-bold ${s.aktif ? "text-red-600 bg-red-50 hover:bg-red-100" : "text-green-600 bg-green-50 hover:bg-green-100"} px-3 py-1.5 rounded-lg transition">
-                          ${s.aktif ? "⛔ Non-aktifkan" : "✅ Aktifkan"}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                `).join("")}
-              </tbody>
-            </table>
-            ${staff.length === 0 ? `
-              <div class="text-center py-16 text-gray-400">
-                <p class="text-4xl mb-3">👥</p>
-                <p class="font-medium">Belum ada staff terdaftar</p>
-              </div>
-            ` : ""}
-          </div>
+              `).join("")}
+            </tbody>
+          </table>
         </div>
       </div>
     `;
-
     return AdminLayout("Manajemen Staff", "staff", content);
   },
 
   HalamanRegistrasi: (error?: string) => {
     const content = `
       <div class="py-6 max-w-xl">
-        <div class="mb-8">
-          <a href="/admin/staff" class="text-sm text-gray-400 hover:text-red-500 font-medium transition mb-3 inline-block">← Kembali ke Staff</a>
-          <p class="text-xs font-bold text-red-500 uppercase tracking-widest mb-1">SDM</p>
-          <h1 class="text-3xl font-black text-gray-900">Tambah Staff Baru</h1>
-          <p class="text-gray-500 text-sm mt-1">Isi data staff dan tentukan role aksesnya.</p>
-        </div>
-
-        ${error ? `
-          <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-6 text-sm font-medium flex items-center gap-2">
-            ⚠️ ${error}
-          </div>
-        ` : ""}
-
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
-          <form method="POST" action="/admin/staff/registrasi" class="space-y-5">
-            <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Nama Lengkap</label>
-              <input type="text" name="nama" required placeholder="cth: Budi Santoso"
-                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition"/>
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Username</label>
-              <input type="text" name="username" required placeholder="cth: budi_dapur" autocomplete="off"
-                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition"/>
-              <p class="text-xs text-gray-400 mt-1">Digunakan untuk login. Tidak boleh mengandung spasi.</p>
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Password</label>
-              <div class="relative">
-                <input type="password" name="password" id="reg-password" required placeholder="Min. 8 karakter" autocomplete="new-password"
-                  class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition pr-12"/>
-                <button type="button" onclick="toggleRegPassword()"
-                  class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm" id="reg-toggle">👁️</button>
-              </div>
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">No. HP</label>
-              <input type="tel" name="no_hp" required placeholder="cth: 081234567890"
-                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition"/>
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Role / Jabatan</label>
-              <div class="grid grid-cols-2 gap-3">
-                ${[
-                  { value: "admin", icon: "🔑", label: "Admin", desc: "Akses penuh ke semua fitur" },
-                  { value: "kasir", icon: "🧾", label: "Kasir", desc: "Kelola pesanan & pembayaran" },
-                  { value: "dapur", icon: "🍳", label: "Dapur", desc: "Lihat antrian & stok bahan" },
-                  { value: "kurir", icon: "🛵", label: "Kurir", desc: "Kelola preorder & pengantaran" },
-                ].map(role => `
-                  <label class="cursor-pointer">
-                    <input type="radio" name="role" value="${role.value}" class="peer sr-only" ${role.value === "kasir" ? "checked" : ""}/>
-                    <div class="border-2 border-gray-200 peer-checked:border-red-500 peer-checked:bg-red-50 rounded-xl p-4 transition hover:border-red-300">
-                      <div class="text-2xl mb-1">${role.icon}</div>
-                      <p class="font-bold text-sm text-gray-800">${role.label}</p>
-                      <p class="text-xs text-gray-400 mt-0.5">${role.desc}</p>
-                    </div>
-                  </label>
-                `).join("")}
-              </div>
-            </div>
-            <div class="pt-2">
-              <button type="submit"
-                class="w-full bg-red-600 hover:bg-red-500 text-white font-black py-3.5 rounded-xl text-sm transition shadow-lg shadow-red-200">
-                Daftarkan Staff →
-              </button>
-            </div>
-          </form>
-        </div>
+        <h1 class="text-2xl font-black mb-6">Tambah Staff Baru</h1>
+        ${error ? `<p class="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm font-bold">⚠️ ${error}</p>` : ""}
+        <form method="POST" action="/admin/staff/registrasi" class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+          <input type="text" name="nama" required placeholder="Nama Lengkap" class="w-full border rounded-xl px-4 py-3 text-sm outline-none"/>
+          <input type="text" name="username" required placeholder="Username" class="w-full border rounded-xl px-4 py-3 text-sm outline-none"/>
+          <input type="password" name="password" required placeholder="Password" class="w-full border rounded-xl px-4 py-3 text-sm outline-none"/>
+          <input type="tel" name="no_hp" required placeholder="No HP" class="w-full border rounded-xl px-4 py-3 text-sm outline-none"/>
+          <select name="role" class="w-full border rounded-xl px-4 py-3 text-sm outline-none bg-white">
+            <option value="kasir">Kasir</option><option value="dapur">Dapur</option><option value="kurir">Kurir</option><option value="admin">Admin</option>
+          </select>
+          <button type="submit" class="w-full bg-red-600 text-white font-black py-3.5 rounded-xl text-sm shadow-lg">Daftarkan Staff</button>
+        </form>
       </div>
-
-      <script>
-        function toggleRegPassword() {
-          const input = document.getElementById('reg-password');
-          const btn = document.getElementById('reg-toggle');
-          input.type = input.type === 'password' ? 'text' : 'password';
-          btn.textContent = input.type === 'password' ? '👁️' : '🙈';
-        }
-      </script>
     `;
-
     return AdminLayout("Registrasi Staff", "staff", content);
   },
 
   HalamanEditStaff: (s: Staff, error?: string) => {
     const content = `
       <div class="py-6 max-w-xl">
-        <div class="mb-8">
-          <a href="/admin/staff" class="text-sm text-gray-400 hover:text-red-500 font-medium transition mb-3 inline-block">← Kembali ke Staff</a>
-          <p class="text-xs font-bold text-red-500 uppercase tracking-widest mb-1">SDM</p>
-          <h1 class="text-3xl font-black text-gray-900">Edit Staff</h1>
-        </div>
-
-        ${error ? `
-          <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-6 text-sm font-medium flex items-center gap-2">
-            ⚠️ ${error}
-          </div>
-        ` : ""}
-
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <form method="POST" action="/admin/staff/update/${s.id}" class="space-y-5">
-            <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Nama Lengkap</label>
-              <input type="text" name="nama" value="${s.nama}" required
-                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition"/>
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Username</label>
-              <input type="text" name="username" value="${s.username}" required
-                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition"/>
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Password Baru <span class="text-gray-300 font-normal">(kosongkan jika tidak diubah)</span></label>
-              <input type="password" name="password" placeholder="••••••••" autocomplete="new-password"
-                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition"/>
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">No. HP</label>
-              <input type="tel" name="no_hp" value="${s.no_hp}" required
-                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 transition"/>
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Role / Jabatan</label>
-              <div class="grid grid-cols-2 gap-3">
-                ${[
-                  { value: "admin", icon: "🔑", label: "Admin", desc: "Akses penuh ke semua fitur" },
-                  { value: "kasir", icon: "🧾", label: "Kasir", desc: "Kelola pesanan & pembayaran" },
-                  { value: "dapur", icon: "🍳", label: "Dapur", desc: "Lihat antrian & stok bahan" },
-                  { value: "kurir", icon: "🛵", label: "Kurir", desc: "Kelola preorder & pengantaran" },
-                ].map(role => `
-                  <label class="cursor-pointer">
-                    <input type="radio" name="role" value="${role.value}" class="peer sr-only" ${s.role === role.value ? "checked" : ""}/>
-                    <div class="border-2 border-gray-200 peer-checked:border-red-500 peer-checked:bg-red-50 rounded-xl p-4 transition hover:border-red-300">
-                      <div class="text-2xl mb-1">${role.icon}</div>
-                      <p class="font-bold text-sm text-gray-800">${role.label}</p>
-                      <p class="text-xs text-gray-400 mt-0.5">${role.desc}</p>
-                    </div>
-                  </label>
-                `).join("")}
-              </div>
-            </div>
-            <div class="pt-2 flex gap-3">
-              <a href="/admin/staff" class="flex-1 border border-gray-200 text-gray-600 font-bold py-3 rounded-xl text-sm text-center hover:bg-gray-50 transition">
-                Batal
-              </a>
-              <button type="submit" class="flex-1 bg-red-600 hover:bg-red-500 text-white font-black py-3 rounded-xl text-sm transition">
-                Simpan Perubahan
-              </button>
-            </div>
-          </form>
-        </div>
+        <h1 class="text-2xl font-black mb-6">Edit Staff: ${s.nama}</h1>
+        ${error ? `<p class="bg-red-50 text-red-600 p-3 rounded-lg mb-4 font-bold">⚠️ ${error}</p>` : ""}
+        <form method="POST" action="/admin/staff/update/${s.id}" class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+          <input type="text" name="nama" value="${s.nama}" required class="w-full border rounded-xl px-4 py-3 text-sm"/>
+          <input type="text" name="username" value="${s.username}" required class="w-full border rounded-xl px-4 py-3 text-sm"/>
+          <input type="password" name="password" placeholder="Password Baru (Kosongkan jika tidak ganti)" class="w-full border rounded-xl px-4 py-3 text-sm"/>
+          <input type="tel" name="no_hp" value="${s.no_hp}" required class="w-full border rounded-xl px-4 py-3 text-sm"/>
+          <select name="role" class="w-full border rounded-xl px-4 py-3 text-sm">
+            <option value="kasir" ${s.role === 'kasir' ? 'selected' : ''}>Kasir</option>
+            <option value="dapur" ${s.role === 'dapur' ? 'selected' : ''}>Dapur</option>
+            <option value="kurir" ${s.role === 'kurir' ? 'selected' : ''}>Kurir</option>
+            <option value="admin" ${s.role === 'admin' ? 'selected' : ''}>Admin</option>
+          </select>
+          <button type="submit" class="w-full bg-red-600 text-white font-black py-3.5 rounded-xl">Simpan Perubahan</button>
+        </form>
       </div>
     `;
-
     return AdminLayout("Edit Staff", "staff", content);
   }
 };
