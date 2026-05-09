@@ -2,6 +2,7 @@
 import { Elysia } from "elysia";
 import { PesananModel } from "../models/Pesanan";
 import { MenuModel } from "../models/Menu";
+import { StokModel } from "../models/Stok"; // Import StokModel untuk mengelola stok
 import { PesananView } from "../views/pages/PesananPage";
 
 // Variabel untuk menyimpan state antrian (mulai dari 0)
@@ -112,7 +113,27 @@ export const PesananController = new Elysia()
   .post("/admin/selesaikan/:id", async ({ params }) => {
     const id = Number(params.id);
     if (!isNaN(id)) {
-      await PesananModel.updateStatus(id, 'Selesai');
+      
+      // 1. Ambil data pesanan saat ini
+      const pesanan = await PesananModel.getById(id);
+      
+      // 2. Cek apakah pesanannya valid dan belum berstatus 'Selesai'
+      if (pesanan && pesanan.status !== 'Selesai') {
+        try {
+          // Parse JSON dari pesanan.items
+          const items = JSON.parse(pesanan.items);
+          
+          // 3. Loop setiap item yang dibeli, potong stok di database
+          for (const item of items) {
+            await StokModel.kurangiStokByNama(item.nama, item.qty);
+          }
+        } catch (error) {
+          console.error("Gagal mengurangi stok:", error);
+        }
+
+        // 4. Update status pesanan jadi Selesai
+        await PesananModel.updateStatus(id, 'Selesai');
+      }
     }
     
     return new Response(null, {
