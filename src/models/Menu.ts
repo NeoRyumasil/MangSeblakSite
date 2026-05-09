@@ -15,11 +15,20 @@ export type Menu = {
 // ============================================================
 
 export const MenuModel = {
-  // Ambil semua data menu
+  // Ambil semua data menu dengan urutan kategori: Bundling -> Makanan -> Minuman
   getAll: async (): Promise<Menu[]> => {
-    const result = await db.execute(
-      "SELECT id_makanan, nama_makanan, harga FROM menu ORDER BY nama_makanan ASC"
-    );
+    const result = await db.execute(`
+      SELECT id_makanan, nama_makanan, harga 
+      FROM menu 
+      ORDER BY 
+        CASE 
+          WHEN LOWER(nama_makanan) LIKE '%bundling%' THEN 1
+          WHEN LOWER(nama_makanan) LIKE '%seblak%' THEN 2
+          WHEN LOWER(nama_makanan) LIKE '%air%' OR LOWER(nama_makanan) LIKE '%minum%' OR LOWER(nama_makanan) LIKE '%es%' THEN 3
+          ELSE 4
+        END ASC,
+        nama_makanan ASC
+    `);
     return result.rows as unknown as Menu[];
   },
 
