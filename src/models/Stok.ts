@@ -59,15 +59,25 @@ export const StokModel = {
   },
 
   // Fungsi baru: Kurangi stok berdasarkan nama item dari menu
+  // Fungsi baru: Kurangi stok berdasarkan nama item dari menu
   kurangiStokByNama: async (namaMenu: string, qty: number): Promise<void> => {
+    
+    let keyword = namaMenu;
+
+    // Aturan Khusus: Jika nama menu mengandung kata "seblak" (huruf besar/kecil bebas),
+    // maka kita paksa pencarian untuk memotong stok barang yang namanya ada kata "seblak"
+    if (namaMenu.toLowerCase().includes("seblak")) {
+      keyword = "seblak";
+    }
+
+    // Mencari barang menggunakan LOWER() agar tidak sensitif huruf besar/kecil
     const result = await db.execute({
-      sql: "SELECT id_barang FROM barang WHERE ? LIKE '%' || nama || '%' OR nama = ?",
-      args: [namaMenu, namaMenu],
+      sql: "SELECT id_barang FROM barang WHERE LOWER(nama) LIKE '%' || ? || '%'",
+      args: [keyword.toLowerCase()],
     });
 
     // Pastikan rows ada dan tidak kosong
     if (result.rows && result.rows.length > 0) {
-      // Cast ke 'any' atau Record untuk memberitahu TS bahwa data ini aman diakses
       const row = result.rows[0] as any; 
       const id_barang = row.id_barang as number;
       
