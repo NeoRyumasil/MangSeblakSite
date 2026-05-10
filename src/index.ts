@@ -1,6 +1,8 @@
 // file: index.ts
 import { Elysia } from "elysia";
 import { html } from "@elysiajs/html";
+import { staticPlugin } from "@elysiajs/static"; 
+
 import { LandingView } from "./views/pages/LandingPage";
 import { MenuView } from "./views/pages/MenuPage";
 import { LoginView } from "./views/pages/LoginPage";
@@ -23,6 +25,10 @@ import { StaffModel } from "./models/Staff";
 
 const app = new Elysia()
   .use(html())
+  .use(staticPlugin({
+    assets: 'public', // Cukup tulis 'public' agar mengarah ke folder root
+    prefix: '/public' // Mengawali URL dengan /public di browser
+  }))
 
   // ----------------------------------------------------------
   // MIDDLEWARE GLOBAL: Wajib Login
@@ -32,7 +38,10 @@ const app = new Elysia()
       "/", "/menu", "/login", "/auth/login", "/logout", "/auth/logout", "/proses-pesanan"
     ];
 
-    if (publicPaths.includes(path)) return; 
+    // Izinkan akses ke static files
+    if (path.startsWith("/public")) return;
+
+    if (publicPaths.includes(path)) return;
 
     if (!session?.value) {
       return new Response(null, { status: 302, headers: { Location: "/login", "HX-Redirect": "/login" } });
@@ -46,7 +55,7 @@ const app = new Elysia()
   .use(StaffController)
   .use(StokController)
   .use(MenuController)
-  .use(PesananController) // Mengatur endpoint /proses-pesanan dan /pesanan
+  .use(PesananController) 
 
   // ----------------------------------------------------------
   // HALAMAN PUBLIK
@@ -61,23 +70,15 @@ const app = new Elysia()
   // ----------------------------------------------------------
   .get("/menu", async () => {
     const menusDb = await MenuModel.getAll();
-    const formattedMenus = menusDb.map((menu) => ({
-      id_barang: menu.id_makanan, nama: menu.nama_makanan, harga: menu.harga,
-    }));
-    return MenuView.HalamanMenu(formattedMenus);
+    return MenuView.HalamanMenu(menusDb);
   })
 
   // ----------------------------------------------------------
   // ADMIN DASHBOARD (TERKONEKSI KE DB)
   // ----------------------------------------------------------
   .get("/admin", async () => {
-    // 1. Fetch data stok asli
     const stokDb = await StokModel.getAll();
-
-    // 2. Fetch data pesanan asli
     const pesananDb = await PesananModel.getAll();
-
-    // 3. Fetch data staff (users) via StaffModel
     const staffDb = await StaffModel.getAll();
 
     return AdminView.HalamanDashboard({ 

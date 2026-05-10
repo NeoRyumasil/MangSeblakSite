@@ -2,10 +2,12 @@
 import { Footer } from "../components/Footer";
 import { Header } from "../components/Header";
 
-type ItemMenu = {
-  id_barang: number;
-  nama: string;
+// Tipe disesuaikan dengan yang ada di Database/Model
+export type ItemMenu = {
+  id_makanan: number;
+  nama_makanan: string;
   harga: number;
+  ImagePath: string;
 };
 
 const MenuLayout = (title: string, content: string) => `
@@ -56,20 +58,20 @@ export const MenuView = {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 bg-gray-50 p-6 rounded-xl border border-gray-200">
           <div>
             <label class="block text-sm font-bold text-gray-700 mb-2">No. Antrian</label>
-            <input type="text" name="no_antrian" id="no_antrian" value="Otomatis" readonly
+            <input type="text" name="no_antrian" id="no_antrian" value="Otomatis" readonly="readonly"
               class="w-full bg-gray-200 border border-gray-300 text-gray-600 rounded-xl px-4 py-3 font-bold cursor-not-allowed">
             <p class="text-xs text-gray-400 mt-1">*Diberikan setelah pesanan dibuat</p>
           </div>
 
           <div>
             <label class="block text-sm font-bold text-gray-700 mb-2">Nama Pembeli <span class="text-red-500">*</span></label>
-            <input type="text" name="nama_pembeli" id="nama_pembeli" required placeholder="Masukkan nama Anda..."
+            <input type="text" name="nama_pembeli" id="nama_pembeli" required="required" placeholder="Masukkan nama Anda..."
               class="w-full bg-white border border-gray-300 text-gray-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition">
           </div>
 
           <div class="md:col-span-2">
             <label class="block text-sm font-bold text-gray-700 mb-2">Nomor Telepon (WhatsApp) <span class="text-red-500">*</span></label>
-            <input type="tel" name="no_hp" id="no_hp" required placeholder="Contoh: 08123456789"
+            <input type="tel" name="no_hp" id="no_hp" required="required" placeholder="Contoh: 08123456789"
               class="w-full bg-white border border-gray-300 text-gray-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition">
           </div>
         </div>
@@ -78,25 +80,48 @@ export const MenuView = {
         <h2 class="text-2xl font-bold text-gray-800 mb-6">Pilih Menu</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          ${items.map(item => `
+          ${items.map(item => {
+            const itemDb = item as any;
+            const pathDb = String(itemDb.ImagePath || itemDb.imagepath || itemDb.image_path || '');
+            
+            let imgSrc = '';
+            
+            if (pathDb.includes('MenuImages')) {
+              const startIndex = pathDb.indexOf('MenuImages');
+              imgSrc = '/public/' + pathDb.substring(startIndex);
+            }
+
+            let imgElement = '';
+            if (imgSrc !== '') {
+               imgElement = '<img src="' + imgSrc + '" alt="' + item.nama_makanan + '" class="w-full h-full object-contain object-center">';
+            } else {
+               const isDrink = item.nama_makanan.toLowerCase().includes('es') || item.nama_makanan.toLowerCase().includes('minum');
+               const icon = isDrink ? '🥤' : '🍲';
+               imgElement = '<div class="text-5xl">' + icon + '</div>';
+            }
+
+            return `
             <div class="bg-orange-50 rounded-2xl border border-orange-100 overflow-hidden flex flex-col">
-              <div class="h-32 bg-orange-100 flex items-center justify-center text-5xl">
-                ${item.nama.toLowerCase().includes('es') || item.nama.toLowerCase().includes('minum') ? '🥤' : '🍲'}
+              
+              <div class="h-48 bg-orange-100 overflow-hidden relative flex items-center justify-center p-2">
+                ${imgElement}
               </div>
+
               <div class="p-5 flex-grow flex flex-col justify-between">
                 <div>
-                  <h3 class="text-xl font-bold mb-1">${item.nama}</h3>
+                  <h3 class="text-xl font-bold mb-1">${item.nama_makanan}</h3>
                   <p class="text-red-600 font-bold text-lg mb-4">Rp ${item.harga.toLocaleString('id-ID')}</p>
                 </div>
 
                 <div class="flex items-center justify-between bg-white rounded-xl p-2 border border-gray-200">
-                  <button type="button" onclick="updateQty(${item.id_barang}, -1)" class="w-10 h-10 rounded-lg bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-600 font-bold text-xl transition flex items-center justify-center">−</button>
-                  <input type="number" name="qty_${item.id_barang}" id="qty_${item.id_barang}" data-price="${item.harga}" data-name="${item.nama}" value="0" min="0" readonly class="qty-input w-12 text-center font-bold text-lg bg-transparent border-none outline-none">
-                  <button type="button" onclick="updateQty(${item.id_barang}, 1)" class="w-10 h-10 rounded-lg bg-orange-100 hover:bg-orange-200 text-orange-600 font-bold text-xl transition flex items-center justify-center">+</button>
+                  <button type="button" onclick="updateQty(${item.id_makanan}, -1)" class="w-10 h-10 rounded-lg bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-600 font-bold text-xl transition flex items-center justify-center">−</button>
+                  <input type="number" name="qty_${item.id_makanan}" id="qty_${item.id_makanan}" data-price="${item.harga}" data-name="${item.nama_makanan}" value="0" min="0" readonly="readonly" class="qty-input w-12 text-center font-bold text-lg bg-transparent border-none outline-none">
+                  <button type="button" onclick="updateQty(${item.id_makanan}, 1)" class="w-10 h-10 rounded-lg bg-orange-100 hover:bg-orange-200 text-orange-600 font-bold text-xl transition flex items-center justify-center">+</button>
                 </div>
               </div>
             </div>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
 
         <div class="bg-red-50 border border-red-200 p-6 rounded-2xl mb-6 flex justify-between items-center shadow-sm">
@@ -135,7 +160,7 @@ export const MenuView = {
           <div class="mb-6">
             <p class="text-sm text-gray-500 font-medium mb-2">Menu yang dipesan:</p>
             <ul id="modal_list_menu" class="space-y-2 text-sm font-medium text-gray-800 bg-gray-50 p-4 rounded-xl border border-gray-200">
-              </ul>
+            </ul>
           </div>
 
           <div class="bg-red-50 rounded-2xl p-5 mb-8 border border-red-100 text-center">
@@ -165,7 +190,7 @@ export const MenuView = {
         if (newVal < 0) newVal = 0; 
         
         input.value = newVal;
-        hitungTotal(); // Update harga saat itu juga
+        hitungTotal(); 
       }
 
       // Fungsi Menghitung Total Harga Form
@@ -188,27 +213,23 @@ export const MenuView = {
       function bukaModal() {
         const form = document.getElementById('form_pesanan');
         
-        // 1. Validasi Input (Memastikan Nama & No HP tidak kosong)
         if (!form.checkValidity()) {
           form.reportValidity(); 
           return;
         }
 
-        // 2. Validasi Keranjang
         const totalBarang = hitungTotal();
         if (totalBarang === 0) {
           alert('Keranjang Anda kosong! Silakan pilih minimal 1 menu.');
           return;
         }
 
-        // 3. Ambil data teks dari form dan masukkan ke Modal
         document.getElementById('modal_no_antrian').innerText = document.getElementById('no_antrian').value;
         document.getElementById('modal_nama').innerText = document.getElementById('nama_pembeli').value;
         document.getElementById('modal_no_hp').innerText = document.getElementById('no_hp').value;
 
-        // 4. Generate List Menu secara Vertikal
         const listMenuEl = document.getElementById('modal_list_menu');
-        listMenuEl.innerHTML = ''; // Kosongkan daftar sebelumnya
+        listMenuEl.innerHTML = ''; 
         
         const inputs = document.querySelectorAll('.qty-input');
         inputs.forEach(input => {
@@ -218,9 +239,9 @@ export const MenuView = {
             const harga = parseInt(input.getAttribute('data-price')) || 0;
             const subtotal = qty * harga;
             
-            // Buat elemen list item
             const li = document.createElement('li');
             li.className = "flex justify-between items-center border-b border-gray-200 pb-2 last:border-0 last:pb-0";
+            
             li.innerHTML = \`
               <span>\${namaMenu} <span class="text-red-500 font-bold ml-1">x\${qty}</span></span>
               <span class="text-gray-600 font-bold">Rp \${subtotal.toLocaleString('id-ID')}</span>
@@ -229,10 +250,7 @@ export const MenuView = {
           }
         });
 
-        // 5. Masukkan total ke dalam text Modal
         document.getElementById('modal_harga').innerText = 'Rp ' + totalBarang.toLocaleString('id-ID');
-        
-        // 6. Tampilkan Modal
         document.getElementById('modal_konfirmasi').classList.remove('hidden');
       }
 
@@ -241,9 +259,7 @@ export const MenuView = {
       }
 
       function prosesPesananHTMX() {
-        tutupModal(); // Tutup modal
-        
-        // Memaksa pengiriman form. HTMX akan otomatis menangkap request ini menuju "/proses-pesanan"
+        tutupModal(); 
         document.getElementById('form_pesanan').requestSubmit();
       }
     </script>

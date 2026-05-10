@@ -8,6 +8,7 @@ export type Menu = {
   id_makanan: number;
   nama_makanan: string;
   harga: number;
+  ImagePath: string;
 };
 
 // ============================================================
@@ -18,7 +19,7 @@ export const MenuModel = {
   // Ambil semua data menu dengan urutan kategori: Bundling -> Makanan -> Minuman
   getAll: async (): Promise<Menu[]> => {
     const result = await db.execute(`
-      SELECT id_makanan, nama_makanan, harga 
+      SELECT id_makanan, nama_makanan, harga, ImagePath 
       FROM menu 
       ORDER BY 
         CASE 
@@ -35,7 +36,7 @@ export const MenuModel = {
   // Ambil satu data menu berdasarkan ID
   getById: async (id: number): Promise<Menu | undefined> => {
     const result = await db.execute({
-      sql: "SELECT id_makanan, nama_makanan, harga FROM menu WHERE id_makanan = ?",
+      sql: "SELECT id_makanan, nama_makanan, harga, ImagePath FROM menu WHERE id_makanan = ?",
       args: [id],
     });
     return result.rows[0] as unknown as Menu | undefined;

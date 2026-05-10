@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
-import { MenuModel } from "../models/Menu"; // Sesuaikan dengan path file model yang dibuat sebelumnya
-// import { MenuView } from "../views/pages/AdminPage"; // Uncomment dan sesuaikan jika Anda menggunakan View
+import { MenuModel } from "../models/Menu"; 
+import { MenuView } from "../views/pages/MenuPage"; 
 
 // ============================================================
 // Controller: MenuController
@@ -12,12 +12,11 @@ export const MenuController = new Elysia({ prefix: "/admin/menu" })
   // GET /admin/menu — halaman utama menu
   // ----------------------------------------------------------
   .get("/", async () => {
+    // menus sudah memiliki struktur: id_makanan, nama_makanan, harga, ImagePath
     const menus = await MenuModel.getAll();
-    // Return HTML View jika ada:
-    // return MenuView.HalamanMenu(menus);
     
-    // Atau return JSON sementara jika View belum dibuat:
-    return menus;
+    // Langsung passing 'menus' ke View, tidak perlu di-map lagi!
+    return MenuView.HalamanMenu(menus);
   })
 
   // ----------------------------------------------------------
@@ -35,9 +34,6 @@ export const MenuController = new Elysia({ prefix: "/admin/menu" })
       return `<p class="text-red-500 text-sm font-medium">Menu tidak ditemukan.</p>`;
     }
 
-    // Return HTML partial View jika ada:
-    // return MenuView.FormEditMenu(item);
-
     return item;
   })
 
@@ -47,10 +43,8 @@ export const MenuController = new Elysia({ prefix: "/admin/menu" })
   .post(
     "/tambah",
     async ({ body }) => {
-      // Panggil operasi database lewat Model
       await MenuModel.create(body.nama_makanan, Number(body.harga));
 
-      // Redirect via HTMX agar tabel ter-refresh dan tidak whitescreen
       return new Response(null, {
         status: 302,
         headers: {
@@ -76,11 +70,9 @@ export const MenuController = new Elysia({ prefix: "/admin/menu" })
       const id = Number(params.id);
       
       if (!Number.isNaN(id)) {
-        // Panggil operasi database lewat Model
         await MenuModel.update(id, body.nama_makanan, Number(body.harga));
       }
 
-      // Selalu redirect via HTMX baik id valid maupun tidak
       return new Response(null, {
         status: 302,
         headers: {
@@ -104,11 +96,9 @@ export const MenuController = new Elysia({ prefix: "/admin/menu" })
     const id = Number(params.id);
     
     if (!Number.isNaN(id)) {
-      // Panggil operasi database lewat Model
       await MenuModel.delete(id);
     }
     
-    // Redirect via HTMX
     return new Response(null, {
       status: 302,
       headers: {
