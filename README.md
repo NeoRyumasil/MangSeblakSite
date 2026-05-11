@@ -48,7 +48,7 @@ TURSO_DATABASE_URL=
 TURSO_AUTH_TOKEN=
 ```
 
-### 4. Start AURA
+### 4. Start the App
 
 ```bash
 bun --watch run index.ts
