@@ -214,7 +214,6 @@ export const KeuanganView = {
             </table>
           </div>
         </div>
-
       </div>
     `;
 

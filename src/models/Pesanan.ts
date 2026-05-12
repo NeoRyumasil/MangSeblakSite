@@ -1,17 +1,18 @@
-// file: models/Pesanan.ts
 import { db } from "./Database";
 
+// Model Pesanan
 export type Pesanan = {
   id_pesanan: number;
   no_antrian: number;
   nama: string;
-  items: string;       // Disimpan dalam bentuk JSON string
+  items: string;       
   total_harga: number;
   status: string;      
-  status_bayar: number; // 0 = Belum Lunas, 1 = Lunas 
+  status_bayar: number; 
   no_hp: string;
 };
 
+// Model DTO Pesanan Baru
 export type CreatePesananDTO = {
   no_antrian: number;
   nama: string;
@@ -20,7 +21,10 @@ export type CreatePesananDTO = {
   total_harga: number;
 };
 
+// SQL untuk Model Pesanan
 export const PesananModel = {
+
+  // Tambah pesanan baru
   create: async (data: CreatePesananDTO): Promise<void> => {
     await db.execute({
       sql: `INSERT INTO pesanan (no_antrian, nama, no_hp, items, total_harga, status, status_bayar) 
@@ -31,12 +35,13 @@ export const PesananModel = {
         data.no_hp, 
         data.items, 
         data.total_harga, 
-        "Menunggu",  // Default status masakan
-        0            // Default status bayar (0 = Belum, 1 = Sudah)
+        "Menunggu",  
+        0            
       ],
     });
   },
 
+  // Ambil semua pesanan dengan urutan terbaru
   getAll: async (): Promise<Pesanan[]> => {
     const result = await db.execute(
       "SELECT id_pesanan, no_antrian, nama, items, total_harga, status, status_bayar, no_hp FROM pesanan ORDER BY id_pesanan DESC"
@@ -44,6 +49,7 @@ export const PesananModel = {
     return result.rows as unknown as Pesanan[];
   },
 
+  // Ambil pesanan berdasarkan ID
   getById: async (id: number): Promise<Pesanan | undefined> => {
     const result = await db.execute({
       sql: "SELECT * FROM pesanan WHERE id_pesanan = ?",
@@ -52,6 +58,7 @@ export const PesananModel = {
     return result.rows[0] as unknown as Pesanan | undefined;
   },
 
+  // Update status pesanan
   updateStatus: async (id: number, statusBaru: string): Promise<void> => {
     await db.execute({
       sql: "UPDATE pesanan SET status = ? WHERE id_pesanan = ?",
@@ -59,6 +66,7 @@ export const PesananModel = {
     });
   },
 
+  // Update status bayar pesanan
   updateStatusBayar: async (id: number, statusBayarBaru: number): Promise<void> => {
     await db.execute({
       sql: "UPDATE pesanan SET status_bayar = ? WHERE id_pesanan = ?",
@@ -66,6 +74,7 @@ export const PesananModel = {
     });
   },
 
+   // Hapus pesanan
   delete: async (id: number): Promise<void> => {
     await db.execute({
       sql: "DELETE FROM pesanan WHERE id_pesanan = ?",

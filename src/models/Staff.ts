@@ -1,6 +1,6 @@
-// file: models/Staff.ts
 import { db } from "./Database";
 
+// Model Staff
 export type Staff = {
   id: number;
   nama: string;
@@ -11,7 +11,7 @@ export type Staff = {
   aktif: boolean;
 };
 
-// Fungsi helper untuk mapping hasil database ke tipe Staff
+// Mapping hasil query ke tipe Staff
 const rowToStaff = (row: any): Staff => ({
   id: row.id as number,
   nama: row.nama as string,
@@ -22,8 +22,9 @@ const rowToStaff = (row: any): Staff => ({
   aktif: row.aktif === 1,
 });
 
+// SQL untuk Model Staff
 export const StaffModel = {
-  // Ambil semua data staff (spesifik kolom yang dibutuhkan)
+  // Ambil semua data staff
   getAll: async (): Promise<Staff[]> => {
     const result = await db.execute(
       "SELECT id, nama, username, role, no_hp, tanggal_bergabung, aktif FROM users ORDER BY tanggal_bergabung DESC"
@@ -31,7 +32,7 @@ export const StaffModel = {
     return result.rows.map(rowToStaff);
   },
 
-  // Ambil satu data staff berdasarkan ID
+  // Ambil staff berdasarkan ID
   getById: async (id: number): Promise<Staff | undefined> => {
     const result = await db.execute({
       sql: "SELECT id, nama, username, role, no_hp, tanggal_bergabung, aktif FROM users WHERE id = ?",
@@ -41,7 +42,7 @@ export const StaffModel = {
     return rowToStaff(result.rows[0]);
   },
 
-  // Cek apakah username sudah ada (untuk validasi registrasi/edit)
+  // Cek Username apakah ada atau tidak
   checkUsernameExists: async (username: string, excludeId?: number): Promise<boolean> => {
     if (excludeId) {
       const result = await db.execute({
@@ -66,7 +67,7 @@ export const StaffModel = {
     });
   },
 
-  // Update data staff (beserta pengecekan jika ada password baru)
+  // Update data staff 
   update: async (id: number, data: any): Promise<void> => {
     if (data.password) {
       await db.execute({
@@ -81,7 +82,7 @@ export const StaffModel = {
     }
   },
 
-  // Update status keaktifan (1 = Aktif, 0 = Non-aktif)
+  // Update status keaktifan staff
   updateStatus: async (id: number, statusAktif: number): Promise<void> => {
     await db.execute({
       sql: "UPDATE users SET aktif = ? WHERE id = ?",

@@ -1,9 +1,6 @@
 import { db } from "./Database";
 
-// ============================================================
-// Types
-// ============================================================
-
+// Model Menu
 export type Menu = {
   id_makanan: number;
   nama_makanan: string;
@@ -11,12 +8,10 @@ export type Menu = {
   ImagePath: string;
 };
 
-// ============================================================
-// Model: MenuModel
-// ============================================================
-
+// SQL untuk Model Menu
 export const MenuModel = {
-  // Ambil semua data menu dengan urutan kategori: Bundling -> Makanan -> Minuman
+  
+  // Ambil semua data menu
   getAll: async (): Promise<Menu[]> => {
     const result = await db.execute(`
       SELECT id_makanan, nama_makanan, harga, ImagePath 
@@ -33,7 +28,7 @@ export const MenuModel = {
     return result.rows as unknown as Menu[];
   },
 
-  // Ambil satu data menu berdasarkan ID
+  // Ambil data berdasarkan ID
   getById: async (id: number): Promise<Menu | undefined> => {
     const result = await db.execute({
       sql: "SELECT id_makanan, nama_makanan, harga, ImagePath FROM menu WHERE id_makanan = ?",

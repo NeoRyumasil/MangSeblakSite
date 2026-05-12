@@ -1,6 +1,7 @@
 import { db } from "../models/Database";
 import type { InValue } from "@libsql/client";
 
+// Model User
 export type User = {
   id: number;
   username: string;
@@ -9,8 +10,10 @@ export type User = {
   role: "admin" | "kasir" | "dapur" | "kurir";
 };
 
+// DTO User Baru
 export type CreateUserInput = Omit<User, "id">;
 
+// SQL untuk Model User
 export const UserModel = {
 
   // Ambil semua user
@@ -59,6 +62,7 @@ export const UserModel = {
     const fields: string[] = [];
     const args: InValue[] = [];
 
+    // Hanya tambahkan field yang ingin diupdate
     if (input.username !== undefined) { fields.push("username = ?"); args.push(input.username); }
     if (input.email    !== undefined) { fields.push("email = ?");    args.push(input.email); }
     if (input.password !== undefined) { fields.push("password = ?"); args.push(input.password); }
