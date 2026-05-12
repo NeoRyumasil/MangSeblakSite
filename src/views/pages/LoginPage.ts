@@ -20,9 +20,9 @@ export const LoginView = {
           opacity: 0.35;
           animation: float 8s ease-in-out infinite;
         }
-        .blob-1 { width: 420px; height: 420px; background: #ef4444; top: -100px; left: -100px; animation-delay: 0s; }
+        .blob-1 { width: 420px; height: 420px; background: #dc2626; top: -100px; left: -100px; animation-delay: 0s; }
         .blob-2 { width: 300px; height: 300px; background: #f97316; bottom: -80px; right: -60px; animation-delay: -3s; }
-        .blob-3 { width: 200px; height: 200px; background: #facc15; top: 40%; left: 30%; animation-delay: -5s; }
+        .blob-3 { width: 200px; height: 200px; background: #1e3a5f; top: 40%; left: 30%; animation-delay: -5s; }
 
         @keyframes float {
           0%, 100% { transform: translateY(0px) scale(1); }
@@ -40,8 +40,8 @@ export const LoginView = {
         .input-field { transition: border-color 0.2s, box-shadow 0.2s; }
         .input-field:focus {
           outline: none;
-          border-color: #ef4444;
-          box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+          border-color: #dc2626;
+          box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
         }
 
         .btn-login { transition: transform 0.1s, box-shadow 0.2s; }
@@ -97,8 +97,8 @@ export const LoginView = {
         <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2rem] p-6 sm:p-8 shadow-2xl">
 
           <div class="text-center mb-6 sm:mb-8">
-            <div class="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-red-500 rounded-2xl shadow-lg shadow-red-500/40 mb-4 text-2xl sm:text-3xl rotate-3">
-              🍜
+            <div class="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 bg-white/10 rounded-2xl shadow-lg mb-4 overflow-hidden">
+              <img src="/public/Logo/Logo.png" alt="Mang Jay Logo" class="w-full h-full object-contain p-1">
             </div>
             <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Mang Jay</h1>
             <p class="text-white/50 text-xs sm:text-sm mt-1 font-medium">Panel Admin — Masuk untuk melanjutkan</p>

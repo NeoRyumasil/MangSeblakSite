@@ -14,7 +14,14 @@ const PesananLayout = (title: string, content: string) => `
     <script src="https://unpkg.com/htmx.org@1.9.11"></script>
     <script>
       tailwind.config = {
-        theme: { extend: { colors: { spicy: { 500: '#ef4444', 600: '#dc2626', 900: '#7f1d1d' } } } }
+        theme: {
+          extend: {
+            colors: {
+              spicy: { 500: '#ef4444', 600: '#dc2626', 900: '#7f1d1d' },
+              navy: { 800: '#1e3a5f', 900: '#152d4a' }
+            }
+          }
+        }
       }
     </script>
     <style>
@@ -26,11 +33,14 @@ const PesananLayout = (title: string, content: string) => `
   </head>
   <body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
     
-    <nav class="bg-gray-900 text-white shadow-md sticky top-0 z-50">
+    <nav class="bg-[#1e3a5f] text-white shadow-md sticky top-0 z-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
           <div class="flex items-center gap-6">
-            <a href="/" class="text-lg sm:text-xl font-black text-white flex items-center gap-2 hover:text-red-400 transition">🍜 Mang Jay</a>
+            <a href="/" class="flex items-center gap-3 hover:opacity-90 transition">
+              <img src="/public/Logo/Logo.png" alt="Mang Jay" class="w-9 h-9 object-contain">
+              <span class="text-lg sm:text-xl font-black text-white">Mang Jay</span>
+            </a>
             
             <div class="hidden md:flex space-x-2">
               <a href="/admin" class="text-white/60 hover:bg-white/10 hover:text-white px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2">
@@ -78,7 +88,7 @@ export const PesananView = {
         </div>
         
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-8 sm:mb-10">
-          <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border-l-4 border-blue-500">
+          <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border-l-4 border-[#1e3a5f]">
             <p class="text-[10px] sm:text-sm text-gray-500 font-bold uppercase">Total Pesanan</p>
             <p class="text-xl sm:text-2xl font-black">${stats.total}</p>
           </div>
@@ -90,7 +100,7 @@ export const PesananView = {
             <p class="text-[10px] sm:text-sm text-gray-500 font-bold uppercase">Keuntungan</p>
             <p class="text-lg sm:text-2xl font-black text-green-600 truncate">Rp ${stats.untung.toLocaleString('id-ID')}</p>
           </div>
-          <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border-l-4 border-red-500">
+          <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border-l-4 border-red-600">
             <p class="text-[10px] sm:text-sm text-gray-500 font-bold uppercase">Sisa Stok</p>
             <p class="text-xl sm:text-2xl font-black">${stats.stok} Porsi</p>
           </div>
@@ -143,7 +153,7 @@ export const PesananView = {
 
                   return `
                     <tr class="${rowClass}">
-                      <td class="px-4 sm:px-6 py-3 sm:py-4 font-black text-lg sm:text-xl ${isSelesai ? 'text-gray-400' : 'text-blue-600'}">#${p.no_antrian}</td>
+                      <td class="px-4 sm:px-6 py-3 sm:py-4 font-black text-lg sm:text-xl ${isSelesai ? 'text-gray-400' : 'text-[#1e3a5f]'}">#${p.no_antrian}</td>
                       <td class="px-4 sm:px-6 py-3 sm:py-4">
                         <p class="font-bold text-base sm:text-lg whitespace-nowrap">${p.nama_pelanggan}</p>
                         ${badgeStatus}

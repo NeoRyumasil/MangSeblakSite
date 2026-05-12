@@ -43,10 +43,15 @@ export type AdminDashboardData = {
 // ============================================================
 
 const Sidebar = (activeTab: string) => `
-  <aside class="w-64 shrink-0 hidden lg:flex flex-col bg-gray-900 min-h-screen fixed top-0 left-0 z-20 pt-0">
+  <aside class="w-64 shrink-0 hidden lg:flex flex-col bg-[#1e3a5f] min-h-screen fixed top-0 left-0 z-20 pt-0">
     <div class="px-6 py-5 border-b border-white/10">
-      <a href="/" class="text-xl font-black text-white flex items-center gap-2">🍜 Mang Jay</a>
-      <p class="text-xs text-white/40 mt-0.5 font-medium">Panel Admin</p>
+      <a href="/" class="flex items-center gap-3 hover:opacity-90 transition">
+        <img src="/public/Logo/Logo.png" alt="Mang Jay" class="w-10 h-10 object-contain">
+        <div>
+          <span class="text-xl font-black text-white block leading-none">Mang Jay</span>
+          <span class="text-xs text-white/40 font-medium">Panel Admin</span>
+        </div>
+      </a>
     </div>
     <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
       ${[
@@ -77,9 +82,12 @@ const Sidebar = (activeTab: string) => `
 `;
 
 const TopBar = (title: string, activeTab: string) => `
-  <header class="lg:hidden bg-gray-900 text-white sticky top-0 z-30 shadow-md">
+  <header class="lg:hidden bg-[#1e3a5f] text-white sticky top-0 z-30 shadow-md">
     <div class="px-5 py-4 flex items-center justify-between">
-      <span class="font-black text-lg">🍜 Mang Jay Admin</span>
+      <a href="/" class="flex items-center gap-2 hover:opacity-90 transition">
+        <img src="/public/Logo/Logo.png" alt="Mang Jay" class="w-8 h-8 object-contain">
+        <span class="font-black text-lg">Mang Jay Admin</span>
+      </a>
       <span class="font-bold text-sm text-white/60 truncate ml-2">${title}</span>
     </div>
     <div class="border-t border-white/10 px-4 py-3 flex gap-2 overflow-x-auto hide-scrollbar">
@@ -108,7 +116,14 @@ const AdminLayout = (title: string, activeTab: string, content: string) => `
     <script src="https://unpkg.com/htmx.org@1.9.11"></script>
     <script>
       tailwind.config = {
-        theme: { extend: { colors: { spicy: { 500: '#ef4444', 600: '#dc2626', 900: '#7f1d1d' } } } }
+        theme: {
+          extend: {
+            colors: {
+              spicy: { 500: '#ef4444', 600: '#dc2626', 900: '#7f1d1d' },
+              navy: { 800: '#1e3a5f', 900: '#152d4a' }
+            }
+          }
+        }
       }
     </script>
     <style>
@@ -166,7 +181,7 @@ export const AdminView = {
     const content = `
       <div class="py-4 sm:py-6 space-y-8 sm:space-y-10">
         <div>
-          <p class="text-[10px] sm:text-xs font-bold text-red-500 uppercase tracking-widest mb-1">Panel Admin</p>
+          <p class="text-[10px] sm:text-xs font-bold text-red-600 uppercase tracking-widest mb-1">Panel Admin</p>
           <h1 class="text-2xl sm:text-3xl font-black text-gray-900">Dashboard</h1>
           <p class="text-xs sm:text-sm text-gray-400 mt-1">Ringkasan stok, pesanan, dan SDM Mang Jay.</p>
         </div>
@@ -184,7 +199,7 @@ export const AdminView = {
             <p class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Barang Stok</p>
             <p class="text-2xl sm:text-3xl font-black text-gray-800">${stok.length}</p>
           </div>
-          <div class="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm border-l-4 border-blue-500">
+          <div class="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm border-l-4 border-[#1e3a5f]">
             <p class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Staff Aktif</p>
             <p class="text-2xl sm:text-3xl font-black text-gray-800">${staffAktif}</p>
           </div>
@@ -240,7 +255,7 @@ export const PesananView = {
       <div class="py-4 sm:py-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 sm:mb-8 gap-4">
           <div>
-            <p class="text-[10px] sm:text-xs font-bold text-red-500 uppercase tracking-widest mb-1">Penjualan</p>
+            <p class="text-[10px] sm:text-xs font-bold text-red-600 uppercase tracking-widest mb-1">Penjualan</p>
             <h1 class="text-2xl sm:text-3xl font-black text-gray-900">Kelola Pesanan</h1>
           </div>
           <button hx-post="/admin/reset-antrian" hx-target="body" hx-confirm="Reset urutan antrian ke 1?" class="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-xl text-sm sm:text-base font-bold hover:bg-red-100 transition shadow-sm flex items-center gap-2 w-full md:w-auto justify-center">
@@ -249,7 +264,7 @@ export const PesananView = {
         </div>
         
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-          <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-blue-500">
+          <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-[#1e3a5f]">
             <p class="text-[10px] sm:text-xs text-gray-400 font-bold uppercase mb-1">Total</p>
             <p class="text-xl sm:text-3xl font-black">${stats.total}</p>
           </div>
@@ -261,7 +276,7 @@ export const PesananView = {
             <p class="text-[10px] sm:text-xs text-gray-400 font-bold uppercase mb-1">Pendapatan</p>
             <p class="text-lg sm:text-2xl font-black text-green-600 truncate">Rp ${stats.untung.toLocaleString('id-ID')}</p>
           </div>
-          <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-red-500">
+          <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-red-600">
             <p class="text-[10px] sm:text-xs text-gray-400 font-bold uppercase mb-1">Sisa Stok</p>
             <p class="text-xl sm:text-2xl font-black">${stats.stok} Porsi</p>
           </div>
@@ -294,7 +309,7 @@ export const PesananView = {
                   const isSelesai = p.status === 'Selesai';
                   return `
                     <tr class="${isSelesai ? 'bg-gray-50 opacity-60' : 'hover:bg-orange-50/40 transition bg-white'}">
-                      <td class="px-4 py-3 sm:px-5 sm:py-4 font-black text-base sm:text-lg ${isSelesai ? 'text-gray-400' : 'text-gray-800'}">#${p.no_antrian}</td>
+                      <td class="px-4 py-3 sm:px-5 sm:py-4 font-black text-base sm:text-lg ${isSelesai ? 'text-gray-400' : 'text-[#1e3a5f]'}">#${p.no_antrian}</td>
                       <td class="px-4 py-3 sm:px-5 sm:py-4">
                         <p class="font-bold text-gray-800 whitespace-nowrap">${p.nama_pelanggan}</p>
                         <p class="text-[10px] font-mono text-gray-400 uppercase">${p.catatan}</p>
@@ -336,7 +351,7 @@ export const StokView = {
       <div class="py-4 sm:py-6">
         <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 sm:mb-8 gap-4">
           <div>
-            <p class="text-[10px] sm:text-xs font-bold text-red-500 uppercase tracking-widest mb-1">Inventaris</p>
+            <p class="text-[10px] sm:text-xs font-bold text-red-600 uppercase tracking-widest mb-1">Inventaris</p>
             <h1 class="text-2xl sm:text-3xl font-black text-gray-900">Stok Barang</h1>
           </div>
           <button onclick="document.getElementById('modal-tambah-stok').classList.remove('hidden')" class="bg-red-600 hover:bg-red-500 text-white px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition shadow-lg w-full md:w-auto">
@@ -428,7 +443,7 @@ export const StaffView = {
     const content = `
       <div class="py-4 sm:py-6">
         <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 sm:mb-8 gap-4">
-          <div><p class="text-[10px] sm:text-xs font-bold text-red-500 uppercase tracking-widest mb-1">SDM</p><h1 class="text-2xl sm:text-3xl font-black text-gray-900">Staff Mang Jay</h1></div>
+          <div><p class="text-[10px] sm:text-xs font-bold text-red-600 uppercase tracking-widest mb-1">SDM</p><h1 class="text-2xl sm:text-3xl font-black text-gray-900">Staff Mang Jay</h1></div>
           <a href="/admin/staff/registrasi" class="bg-red-600 text-white px-5 py-2.5 rounded-xl font-bold text-center text-xs sm:text-sm shadow-lg w-full md:w-auto">Tambah Staff</a>
         </div>
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">

@@ -29,7 +29,7 @@ export const KeuanganView = {
 
         <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 md:mb-8 gap-4">
           <div>
-            <p class="text-xs font-bold text-red-500 uppercase tracking-widest mb-1">Laporan Keuangan</p>
+            <p class="text-xs font-bold text-red-600 uppercase tracking-widest mb-1">Laporan Keuangan</p>
             <h1 class="text-2xl sm:text-3xl font-black text-gray-900">${rekap.bulan}</h1>
           </div>
           <div class="flex gap-3">
@@ -85,8 +85,8 @@ export const KeuanganView = {
             <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 md:mb-6 gap-3">
               <h2 class="text-base sm:text-lg font-black text-gray-800">Grafik Keuangan Per Minggu</h2>
               <div class="flex items-center gap-3 sm:gap-4 text-[10px] sm:text-xs font-semibold">
-                <span class="flex items-center gap-1 sm:gap-1.5"><span class="w-2.5 sm:w-3 h-2.5 sm:h-3 rounded-sm bg-blue-400 inline-block"></span>Pendapatan</span>
-                <span class="flex items-center gap-1 sm:gap-1.5"><span class="w-2.5 sm:w-3 h-2.5 sm:h-3 rounded-sm bg-red-400 inline-block"></span>Pengeluaran</span>
+                <span class="flex items-center gap-1 sm:gap-1.5"><span class="w-2.5 sm:w-3 h-2.5 sm:h-3 rounded-sm bg-[#1e3a5f] inline-block"></span>Pendapatan</span>
+                <span class="flex items-center gap-1 sm:gap-1.5"><span class="w-2.5 sm:w-3 h-2.5 sm:h-3 rounded-sm bg-red-500 inline-block"></span>Pengeluaran</span>
                 <span class="flex items-center gap-1 sm:gap-1.5"><span class="w-2.5 sm:w-3 h-2.5 sm:h-3 rounded-sm bg-green-400 inline-block"></span>Keuntungan</span>
               </div>
             </div>
@@ -101,12 +101,12 @@ export const KeuanganView = {
                     return `
                     <div class="flex-1 flex flex-col items-center gap-1">
                       <div class="w-full flex items-end justify-center gap-0.5 sm:gap-1" style="height:180px; overflow:visible">
-                        <div class="flex-1 rounded-t-lg bg-blue-400 transition-all duration-700 hover:bg-blue-500 relative group" style="height:${hPendapatan}px; min-width:6px">
+                        <div class="flex-1 rounded-t-lg bg-[#1e3a5f] transition-all duration-700 hover:opacity-80 relative group" style="height:${hPendapatan}px; min-width:6px">
                           <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] rounded px-2 py-1 whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-10">
                             Rp ${d.pendapatan.toLocaleString('id-ID')}
                           </div>
                         </div>
-                        <div class="flex-1 rounded-t-lg bg-red-400 transition-all duration-700 hover:bg-red-500 relative group" style="height:${hPengeluaran}px; min-width:6px">
+                        <div class="flex-1 rounded-t-lg bg-red-500 transition-all duration-700 hover:bg-red-600 relative group" style="height:${hPengeluaran}px; min-width:6px">
                           <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] rounded px-2 py-1 whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-10">
                             Rp ${d.pengeluaran.toLocaleString('id-ID')}
                           </div>
@@ -128,7 +128,7 @@ export const KeuanganView = {
           </div>
 
           <div class="flex flex-col gap-4">
-            <div class="bg-gradient-to-br from-red-500 to-orange-500 rounded-2xl p-5 sm:p-6 text-white shadow-sm">
+            <div class="bg-gradient-to-br from-red-600 to-orange-500 rounded-2xl p-5 sm:p-6 text-white shadow-sm">
               <p class="text-[10px] sm:text-xs font-bold uppercase tracking-widest opacity-80 mb-2">⭐ Item Terlaris Bulan Ini</p>
               <p class="text-xl sm:text-2xl font-black mb-1">${rekap.item_terlaris}</p>
               <p class="text-xs sm:text-sm opacity-80">Terjual <span class="font-black text-yellow-300">${rekap.item_terlaris_qty} porsi</span> bulan ini</p>
@@ -139,7 +139,7 @@ export const KeuanganView = {
               <div class="relative w-24 h-24 sm:w-32 sm:h-32">
                 <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
                   <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f3f4f6" stroke-width="3.5"/>
-                  <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f87171" stroke-width="3.5"
+                  <circle cx="18" cy="18" r="15.9" fill="none" stroke="#ef4444" stroke-width="3.5"
                     stroke-dasharray="${Math.round((rekap.total_pengeluaran / rekap.total_pendapatan) * 100)} 100"
                     stroke-linecap="round"/>
                   <circle cx="18" cy="18" r="15.9" fill="none" stroke="#4ade80" stroke-width="3.5"
@@ -153,7 +153,7 @@ export const KeuanganView = {
                 </div>
               </div>
               <div class="flex gap-4 mt-4 text-[10px] sm:text-xs">
-                <span class="flex items-center gap-1"><span class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-red-400 inline-block"></span>Pengeluaran</span>
+                <span class="flex items-center gap-1"><span class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-red-500 inline-block"></span>Pengeluaran</span>
                 <span class="flex items-center gap-1"><span class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-green-400 inline-block"></span>Keuntungan</span>
               </div>
             </div>
@@ -186,7 +186,7 @@ export const KeuanganView = {
                       <p class="font-bold text-gray-800">${d.minggu}</p>
                     </td>
                     <td class="px-4 py-3 sm:px-6 sm:py-4">
-                      <span class="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold">${d.jumlah_pesanan} Pesanan</span>
+                      <span class="bg-blue-50 text-[#1e3a5f] px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold">${d.jumlah_pesanan} Pesanan</span>
                     </td>
                     <td class="px-4 py-3 sm:px-6 sm:py-4 font-semibold text-gray-800 whitespace-nowrap">Rp ${d.pendapatan.toLocaleString('id-ID')}</td>
                     <td class="px-4 py-3 sm:px-6 sm:py-4 font-semibold text-red-600 whitespace-nowrap">Rp ${d.pengeluaran.toLocaleString('id-ID')}</td>
@@ -198,7 +198,7 @@ export const KeuanganView = {
                 `}).join('')}
               </tbody>
               <tfoot class="text-xs sm:text-sm">
-                <tr class="bg-gray-900 text-white">
+                <tr class="bg-[#1e3a5f] text-white">
                   <td class="px-4 py-3 sm:px-6 sm:py-4 font-black">TOTAL BULAN INI</td>
                   <td class="px-4 py-3 sm:px-6 sm:py-4 font-bold whitespace-nowrap">${rekap.total_pesanan} Pesanan</td>
                   <td class="px-4 py-3 sm:px-6 sm:py-4 font-bold whitespace-nowrap">Rp ${rekap.total_pendapatan.toLocaleString('id-ID')}</td>

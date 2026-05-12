@@ -25,7 +25,8 @@ const MenuLayout = (title: string, content: string) => `
           extend: {
             colors: {
               spicy: { 500: '#ef4444', 600: '#dc2626', 900: '#7f1d1d' },
-              korean: '#facc15'
+              korean: '#facc15',
+              navy: { 800: '#1e3a5f' }
             }
           }
         }
