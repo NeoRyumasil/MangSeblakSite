@@ -1,8 +1,4 @@
-// file: views/pages/PesananPage.ts
-
-// ============================================================
-// Custom Layout Khusus Halaman Pesanan (Admin/Dapur)
-// ============================================================
+// Layout dan View untuk halaman menu pemesanan
 const PesananLayout = (title: string, content: string) => `
   <!DOCTYPE html>
   <html lang="id">
@@ -75,6 +71,7 @@ const PesananLayout = (title: string, content: string) => `
   </html>
 `;
 
+// View untuk halaman manajemen pesanan di admin
 export const PesananView = {
   HalamanPesanan: (stats: any, pesananAktif: any[]) => {
     const content = `

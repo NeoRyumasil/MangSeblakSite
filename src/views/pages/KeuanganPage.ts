@@ -1,15 +1,17 @@
 import { Layout } from "../components/Layout";
 
+// Tipe data untuk rekap keuangan per minggu
 type DataMinggu = {
-  minggu: string; // "Minggu 1", "Minggu 2", dst
+  minggu: string; 
   pendapatan: number;
   pengeluaran: number;
   keuntungan: number;
   jumlah_pesanan: number;
 };
 
+// Tipe data untuk rekap keuangan bulanan
 type RekapKeuangan = {
-  bulan: string; // "Juli 2026"
+  bulan: string; 
   total_pendapatan: number;
   total_pengeluaran: number;
   total_keuntungan: number;
@@ -20,6 +22,7 @@ type RekapKeuangan = {
   data_mingguan: DataMinggu[];
 };
 
+// View untuk halaman keuangan
 export const KeuanganView = {
   HalamanKeuangan: (rekap: RekapKeuangan) => {
     const maxPendapatan = Math.max(...rekap.data_mingguan.map(d => d.pendapatan));

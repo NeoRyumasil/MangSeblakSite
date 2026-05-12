@@ -1,8 +1,7 @@
-// file: views/pages/MenuPage.ts
 import { Footer } from "../components/Footer";
 import { Header } from "../components/Header";
 
-// Tipe disesuaikan dengan yang ada di Database/Model
+// Model untuk item menu yang akan ditampilkan 
 export type ItemMenu = {
   id_makanan: number;
   nama_makanan: string;
@@ -10,6 +9,7 @@ export type ItemMenu = {
   ImagePath: string;
 };
 
+// Layout umum untuk halaman menu
 const MenuLayout = (title: string, content: string) => `
   <!DOCTYPE html>
   <html lang="id">
@@ -43,6 +43,7 @@ const MenuLayout = (title: string, content: string) => `
   </html>
 `;
 
+// View untuk halaman menu pemesanan
 export const MenuView = {
   HalamanMenu: (items: ItemMenu[]) => MenuLayout(
     "Pesan Menu - Seblak Korea Mang Jay",

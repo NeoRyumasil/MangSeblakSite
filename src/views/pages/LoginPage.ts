@@ -1,3 +1,4 @@
+// View untuk halaman login admin
 export const LoginView = {
   HalamanLogin: (error?: string) => `
     <!DOCTYPE html>

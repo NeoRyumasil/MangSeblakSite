@@ -1,9 +1,4 @@
-// file: views/pages/AdminPage.ts
-
-// ============================================================
-// Types
-// ============================================================
-
+// Model Barang
 type Barang = {
   id_barang: number;
   nama: string;
@@ -11,6 +6,7 @@ type Barang = {
   stok: number;
 };
 
+// Model Pesanan
 type Pesanan = {
   id_pesanan: number;
   no_antrian: number;
@@ -22,6 +18,7 @@ type Pesanan = {
   no_hp: string;
 };
 
+// Model Staff
 type Staff = {
   id: number;
   nama: string;
@@ -32,16 +29,14 @@ type Staff = {
   aktif: boolean;
 };
 
+// Model User
 export type AdminDashboardData = {
   stok: Barang[];
   pesanan: Pesanan[];
   staff: Staff[];
 };
 
-// ============================================================
-// Helper: Sidebar Nav
-// ============================================================
-
+// Sidebar Admin
 const Sidebar = (activeTab: string) => `
   <aside class="w-64 shrink-0 hidden lg:flex flex-col bg-[#1e3a5f] min-h-screen fixed top-0 left-0 z-20 pt-0">
     <div class="px-6 py-5 border-b border-white/10">
@@ -81,6 +76,7 @@ const Sidebar = (activeTab: string) => `
   </aside>
 `;
 
+// TopBar untuk tampilan mobile
 const TopBar = (title: string, activeTab: string) => `
   <header class="lg:hidden bg-[#1e3a5f] text-white sticky top-0 z-30 shadow-md">
     <div class="px-5 py-4 flex items-center justify-between">
@@ -105,6 +101,7 @@ const TopBar = (title: string, activeTab: string) => `
   </header>
 `;
 
+// Layout utama untuk halaman admin
 const AdminLayout = (title: string, activeTab: string, content: string) => `
   <!DOCTYPE html>
   <html lang="id">
@@ -147,10 +144,7 @@ const AdminLayout = (title: string, activeTab: string, content: string) => `
   </html>
 `;
 
-// ============================================================
-// Helpers: Badges
-// ============================================================
-
+// Badge untuk status stok
 const badgeStok = (stok: number) => {
   if (stok === 0)
     return `<span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold bg-red-100 text-red-700 whitespace-nowrap">Habis</span>`;
@@ -159,6 +153,7 @@ const badgeStok = (stok: number) => {
   return `<span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold bg-green-100 text-green-700 whitespace-nowrap">Aman</span>`;
 };
 
+// Badge untuk role staff
 const badgeRole: Record<Staff["role"], string> = {
   admin: `<span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold bg-red-100 text-red-700 whitespace-nowrap">Admin</span>`,
   kasir: `<span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold bg-blue-100 text-blue-700 whitespace-nowrap">Kasir</span>`,
@@ -166,10 +161,7 @@ const badgeRole: Record<Staff["role"], string> = {
   kurir: `<span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold bg-green-100 text-green-700 whitespace-nowrap">Kurir</span>`,
 };
 
-// ============================================================
-// ADMIN DASHBOARD — /admin
-// ============================================================
-
+// View untuk halaman dashboard admin
 export const AdminView = {
   HalamanDashboard: (data: AdminDashboardData) => {
     const { stok, pesanan, staff } = data;
@@ -245,10 +237,7 @@ export const AdminView = {
   }
 };
 
-// ============================================================
-// PESANAN VIEW — /pesanan (Bila digunakan di dalam AdminLayout)
-// ============================================================
-
+// View untuk halaman manajemen pesanan
 export const PesananView = {
   HalamanPesanan: (stats: any, pesananAktif: any[]) => {
     const content = `
@@ -337,10 +326,7 @@ export const PesananView = {
   }
 };
 
-// ============================================================
-// STOK VIEW — /admin/stok
-// ============================================================
-
+// View untuk halaman manajemen stok
 export const StokView = {
   HalamanStok: (barang: Barang[]) => {
     const habis = barang.filter(b => b.stok === 0).length;
@@ -433,10 +419,7 @@ export const StokView = {
   `,
 };
 
-// ============================================================
-// STAFF VIEW — /admin/staff
-// ============================================================
-
+// View untuk halaman manajemen staff
 export const StaffView = {
   HalamanStaff: (staff: Staff[]) => {
     const aktif = staff.filter(s => s.aktif).length;
@@ -473,6 +456,7 @@ export const StaffView = {
     return AdminLayout("Manajemen Staff", "staff", content);
   },
 
+  // View untuk halaman registrasi staff baru
   HalamanRegistrasi: (error?: string) => {
     const content = `
       <div class="py-4 sm:py-6 max-w-xl mx-auto w-full">
@@ -493,6 +477,7 @@ export const StaffView = {
     return AdminLayout("Registrasi Staff", "staff", content);
   },
 
+  // View untuk halaman edit data staff
   HalamanEditStaff: (s: Staff, error?: string) => {
     const content = `
       <div class="py-4 sm:py-6 max-w-xl mx-auto w-full">

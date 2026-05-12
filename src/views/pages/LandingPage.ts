@@ -1,5 +1,6 @@
 import { Layout } from "../components/Layout";
 
+// View untuk Landing Page
 export const LandingView = {
   HalamanUtama: () => {
  
