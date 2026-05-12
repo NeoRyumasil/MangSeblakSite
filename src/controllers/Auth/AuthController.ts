@@ -3,10 +3,7 @@ import { html } from "@elysiajs/html";
 import { UserModel } from "../../models/User";
 import { LoginView } from "../../views/pages/LoginPage";
 
-// ============================================================
-// Validasi body
-// ============================================================
-
+// Skema validasi untuk request body
 const RegisterBody = t.Object({
   username: t.String({ minLength: 3 }),
   email:    t.String({ format: "email" }),
@@ -19,21 +16,18 @@ const RegisterBody = t.Object({
   ]),
 });
 
+// Skema validasi untuk login
 const LoginBody = t.Object({
   username: t.String({ minLength: 3 }),
   password: t.String(),
 });
 
-// ============================================================
-// Controller
-// ============================================================
-
+// Controller Autentikasi
 export const AuthController = new Elysia({ prefix: "/auth" })
   .use(html())
 
-  // Jika ada yang GET /auth/login secara manual, redirect ke halaman utama /login
+  // Mengarahkan ke halaman login jika akses langsung ke /auth
   .get("/login", ({ set }) => {
-    // Cara paling aman melakukan redirect di ElysiaJS versi terbaru:
     set.redirect = "/login";
     return new Response(null, {
       status: 302,
@@ -41,9 +35,7 @@ export const AuthController = new Elysia({ prefix: "/auth" })
     });
   })
 
-  // ----------------------------------------------------------
-  // POST /auth/register
-  // ----------------------------------------------------------
+  // Register route (hanya untuk admin)
   .post(
     "/register",
     async ({ body, set }) => {
@@ -69,7 +61,7 @@ export const AuthController = new Elysia({ prefix: "/auth" })
 
       const targetUrl = "/admin?tab=staff";
       
-      // Menggunakan Response bawaan untuk memaksa redirect (menghindari white screen)
+      // Redirect ke halaman admin setelah registrasi berhasil
       return new Response(null, {
         status: 302,
         headers: {
@@ -81,9 +73,7 @@ export const AuthController = new Elysia({ prefix: "/auth" })
     { body: RegisterBody }
   )
 
-  // ----------------------------------------------------------
-  // POST /auth/login
-  // ----------------------------------------------------------
+  // Post Login 
   .post(
     "/login",
     async ({ body, set, cookie }) => {
@@ -112,13 +102,13 @@ export const AuthController = new Elysia({ prefix: "/auth" })
           role:     user.role,
         }),
         httpOnly: true,
-        maxAge:   60 * 60 * 8, // 8 jam
+        maxAge:   60 * 60 * 8, 
         path:     "/",
       });
 
       // Redirect map sesuai role
       const redirectMap: Record<string, string> = {
-        admin:  "/admin", // Langsung ke dashboard admin
+        admin:  "/admin", 
         kasir:  "/pesanan",
         dapur:  "/pesanan",
         kurir:  "/preorder",
@@ -126,21 +116,19 @@ export const AuthController = new Elysia({ prefix: "/auth" })
 
       const targetUrl = redirectMap[user.role] ?? "/";
       
-      // PERUBAHAN UTAMA: Kembalikan objek Response HTTP murni untuk redirect
+      // Redirect ke halaman sesuai role setelah login berhasil
       return new Response(null, {
         status: 302,
         headers: {
           Location: targetUrl,
-          "HX-Redirect": targetUrl, // Tetap sediakan untuk jaga-jaga jika nanti pakai HTMX
+          "HX-Redirect": targetUrl,
         },
       });
     },
     { body: LoginBody }
   )
 
-  // ----------------------------------------------------------
-  // GET /auth/logout
-  // ----------------------------------------------------------
+   // Logout route
   .get("/logout", ({ cookie, set }) => {
     cookie.session?.remove();
     

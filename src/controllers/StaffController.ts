@@ -4,23 +4,20 @@ import { html } from "@elysiajs/html";
 import { StaffView } from "../views/pages/AdminPage";
 import { StaffModel } from "../models/Staff";
 
-// ============================================================
-// Controller
-// ============================================================
-
+// Controller untuk manajemen staff
 export const StaffController = new Elysia({ prefix: "/admin/staff" })
   .use(html())
 
-  // GET /admin/staff
+  // Tampilkan halaman daftar staff
   .get("/", async () => {
     const staff = await StaffModel.getAll();
     return StaffView.HalamanStaff(staff);
   })
 
-  // GET /admin/staff/registrasi
+  // Tampilkan halaman registrasi staff baru
   .get("/registrasi", () => StaffView.HalamanRegistrasi())
 
-  // POST /admin/staff/registrasi
+  // Registrasi staff baru
   .post(
     "/registrasi",
     async ({ body }) => {
@@ -32,6 +29,7 @@ export const StaffController = new Elysia({ prefix: "/admin/staff" })
         return StaffView.HalamanRegistrasi("Username sudah digunakan, pilih yang lain.");
       }
 
+      // Hash password menggunakan bcrypt
       const hashedPassword = await Bun.password.hash(password, { algorithm: "bcrypt", cost: 10 });
       const tanggal_bergabung = new Date().toISOString().slice(0, 10);
 
@@ -59,27 +57,28 @@ export const StaffController = new Elysia({ prefix: "/admin/staff" })
     }
   )
 
-  // GET /admin/staff/edit/:id
+  // Tampilkan halaman edit staff
   .get("/edit/:id", async ({ params }) => {
     const staff = await StaffModel.getById(Number(params.id));
     if (!staff) return "Staff tidak ditemukan.";
     return StaffView.HalamanEditStaff(staff);
   })
 
-  // POST /admin/staff/update/:id
+  // Update data staff
   .post(
     "/update/:id",
     async ({ params, body }) => {
       const id = Number(params.id);
       const { username, nama, no_hp, role } = body;
 
-      // Cek username duplikat via Model (kecuali dirinya sendiri)
+      // Cek username duplikat via Model 
       const isExist = await StaffModel.checkUsernameExists(username, id);
       if (isExist) {
         const staff = await StaffModel.getById(id);
         if(staff) return StaffView.HalamanEditStaff(staff, "Username sudah digunakan oleh staff lain.");
       }
 
+      // Hash password baru jika diisi, jika tidak biarkan tetap sama
       let newPasswordHash;
       if (body.password && body.password.trim().length > 0) {
         newPasswordHash = await Bun.password.hash(body.password.trim(), { algorithm: "bcrypt", cost: 10 });
@@ -108,13 +107,13 @@ export const StaffController = new Elysia({ prefix: "/admin/staff" })
     }
   )
 
-  // POST /admin/staff/aktifkan/:id
+  // Aktifkan staff
   .post("/aktifkan/:id", async ({ params }) => {
     await StaffModel.updateStatus(Number(params.id), 1);
     return new Response(null, { status: 302, headers: { Location: "/admin/staff", "HX-Redirect": "/admin/staff" } });
   })
 
-  // POST /admin/staff/nonaktifkan/:id
+  // Nonaktifkan staff
   .post("/nonaktifkan/:id", async ({ params }) => {
     await StaffModel.updateStatus(Number(params.id), 0);
     return new Response(null, { status: 302, headers: { Location: "/admin/staff", "HX-Redirect": "/admin/staff" } });

@@ -1,18 +1,16 @@
-// file: controllers/PesananController.ts
 import { Elysia } from "elysia";
 import { PesananModel } from "../models/Pesanan";
 import { MenuModel } from "../models/Menu";
 import { StokModel } from "../models/Stok"; // Import StokModel untuk mengelola stok
 import { PesananView } from "../views/pages/AdminPage";
 
-// Variabel untuk menyimpan state antrian (mulai dari 0)
+// Variable untuk nomor antrian
 let counterAntrian = 0;
 
+// Controller untuk manajemen pesanan
 export const PesananController = new Elysia()
 
-  // ----------------------------------------------------------
-  // POST /proses-pesanan : Menyimpan pesanan dari MenuPage
-  // ----------------------------------------------------------
+  // Proses pembuatan pesanan baru dari form di halaman menu
   .post("/proses-pesanan", async ({ body }) => {
     const input = body as any;
     const menusDb = await MenuModel.getAll();
@@ -42,8 +40,9 @@ export const PesananController = new Elysia()
     counterAntrian += 1;
     const noAntrianBaru = counterAntrian;
 
+    // Simpan pesanan baru ke database
     await PesananModel.create({
-      no_antrian: noAntrianBaru, // Menggunakan nomor urut dari server
+      no_antrian: noAntrianBaru, 
       nama: input.nama_pembeli,
       no_hp: input.no_hp,
       items: JSON.stringify(itemsSelected),
@@ -62,11 +61,8 @@ export const PesananController = new Elysia()
     `;
   })
 
-  // ----------------------------------------------------------
-  // GET /pesanan : Menampilkan halaman daftar pesanan (Admin/Dapur)
-  // ----------------------------------------------------------
+  // Ambil semua pesanan untuk ditampilkan di halaman admin
   .get("/pesanan", async () => {
-    // Ambil SEMUA pesanan dari database agar yang "Selesai" tidak hilang
     const semuaPesanan = await PesananModel.getAll();
     
     const pesananBelumSelesai = semuaPesanan.filter(p => p.status === 'Menunggu' || p.status === 'Diproses');
@@ -84,7 +80,7 @@ export const PesananController = new Elysia()
       no_antrian: p.no_antrian,
       nama_pelanggan: p.nama,
       catatan: `HP: ${p.no_hp}`, 
-      status: p.status, // Kirim status asli ke view
+      status: p.status, 
       items: p.items,
       total_harga: p.total_harga
     }));
@@ -92,11 +88,9 @@ export const PesananController = new Elysia()
     return PesananView.HalamanPesanan(stats, formattedPesanan);
   })
 
-  // ----------------------------------------------------------
-  // POST /admin/reset-antrian : Endpoint untuk mereset ke 0
-  // ----------------------------------------------------------
+  // reset nomor antrian
   .post("/admin/reset-antrian", () => {
-    counterAntrian = 0; // Reset ke 0
+    counterAntrian = 0; 
     
     return new Response(null, {
       status: 302,
@@ -107,23 +101,17 @@ export const PesananController = new Elysia()
     });
   })
   
-  // ----------------------------------------------------------
-  // POST /admin/selesaikan/:id : Endpoint Selesaikan Pesanan
-  // ----------------------------------------------------------
+  // Selesaikan pesanan dan potong stok
   .post("/admin/selesaikan/:id", async ({ params }) => {
     const id = Number(params.id);
     if (!isNaN(id)) {
       
-      // 1. Ambil data pesanan saat ini
       const pesanan = await PesananModel.getById(id);
       
-      // 2. Cek apakah pesanannya valid dan belum berstatus 'Selesai'
       if (pesanan && pesanan.status !== 'Selesai') {
         try {
-          // Parse JSON dari pesanan.items
           const items = JSON.parse(pesanan.items);
           
-          // 3. Loop setiap item yang dibeli, potong stok di database
           for (const item of items) {
             await StokModel.kurangiStokByNama(item.nama, item.qty);
           }
@@ -131,7 +119,6 @@ export const PesananController = new Elysia()
           console.error("Gagal mengurangi stok:", error);
         }
 
-        // 4. Update status pesanan jadi Selesai
         await PesananModel.updateStatus(id, 'Selesai');
       }
     }
@@ -145,9 +132,7 @@ export const PesananController = new Elysia()
     });
   })
   
-  // ----------------------------------------------------------
-  // POST /admin/batal-selesaikan/:id : Mengembalikan pesanan ke Menunggu
-  // ----------------------------------------------------------
+  // Batalkan penyelesaian pesanan
   .post("/admin/batal-selesaikan/:id", async ({ params }) => {
     const id = Number(params.id);
     if (!isNaN(id)) {

@@ -2,26 +2,17 @@ import { Elysia, t } from "elysia";
 import { MenuModel } from "../models/Menu"; 
 import { MenuView } from "../views/pages/MenuPage"; 
 
-// ============================================================
-// Controller: MenuController
-// ============================================================
 
+// Controller untuk manajemen menu 
 export const MenuController = new Elysia({ prefix: "/admin/menu" })
-
-  // ----------------------------------------------------------
-  // GET /admin/menu — halaman utama menu
-  // ----------------------------------------------------------
+  
+  // Mengambil semua menu
   .get("/", async () => {
-    // menus sudah memiliki struktur: id_makanan, nama_makanan, harga, ImagePath
     const menus = await MenuModel.getAll();
-    
-    // Langsung passing 'menus' ke View, tidak perlu di-map lagi!
     return MenuView.HalamanMenu(menus);
   })
 
-  // ----------------------------------------------------------
-  // GET /admin/menu/edit/:id — partial form edit (untuk HTMX)
-  // ----------------------------------------------------------
+  // Mengambil data menu berdasarkan ID untuk edit
   .get("/edit/:id", async ({ params }) => {
     const id = Number(params.id);
     if (Number.isNaN(id)) {
@@ -37,9 +28,7 @@ export const MenuController = new Elysia({ prefix: "/admin/menu" })
     return item;
   })
 
-  // ----------------------------------------------------------
-  // POST /admin/menu/tambah — insert menu baru
-  // ----------------------------------------------------------
+  // Menambah menu baru
   .post(
     "/tambah",
     async ({ body }) => {
@@ -61,9 +50,7 @@ export const MenuController = new Elysia({ prefix: "/admin/menu" })
     }
   )
 
-  // ----------------------------------------------------------
-  // POST /admin/menu/update/:id — update menu
-  // ----------------------------------------------------------
+  // Update menu yang ada
   .post(
     "/update/:id",
     async ({ params, body }) => {
@@ -89,9 +76,7 @@ export const MenuController = new Elysia({ prefix: "/admin/menu" })
     }
   )
 
-  // ----------------------------------------------------------
-  // POST /admin/menu/hapus/:id — hapus menu
-  // ----------------------------------------------------------
+  // Hapus menu
   .post("/hapus/:id", async ({ params }) => {
     const id = Number(params.id);
     

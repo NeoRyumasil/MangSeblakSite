@@ -2,23 +2,16 @@ import { Elysia, t } from "elysia";
 import { StokModel } from "../models/Stok";
 import { StokView } from "../views/pages/AdminPage";
 
-// ============================================================
-// Controller: StokController
-// ============================================================
-
+// Controller untuk manajemen stok barang
 export const StokController = new Elysia({ prefix: "/admin/stok" })
 
-  // ----------------------------------------------------------
-  // GET /admin/stok — halaman utama stok
-  // ----------------------------------------------------------
+  // Ambil semua stok barang
   .get("/", async () => {
     const barang = await StokModel.getAll();
     return StokView.HalamanStok(barang);
   })
 
-  // ----------------------------------------------------------
-  // GET /admin/stok/edit/:id — partial form edit (untuk HTMX)
-  // ----------------------------------------------------------
+  // Ambil data stok berdasarkan ID untuk edit
   .get("/edit/:id", async ({ params }) => {
     const id = Number(params.id);
     if (Number.isNaN(id)) {
@@ -34,16 +27,12 @@ export const StokController = new Elysia({ prefix: "/admin/stok" })
     return StokView.FormEditStok(item);
   })
 
-  // ----------------------------------------------------------
-  // POST /admin/stok/tambah — insert barang baru
-  // ----------------------------------------------------------
+  // Tambah barang baru
   .post(
     "/tambah",
     async ({ body }) => {
-      // Panggil operasi database lewat Model
       await StokModel.create(body.nama, Number(body.harga), Number(body.stok));
 
-      // Redirect via HTMX agar tabel ter-refresh dan tidak whitescreen
       return new Response(null, {
         status: 302,
         headers: {
@@ -61,20 +50,16 @@ export const StokController = new Elysia({ prefix: "/admin/stok" })
     }
   )
 
-  // ----------------------------------------------------------
-  // POST /admin/stok/update/:id — update barang
-  // ----------------------------------------------------------
+  // Update barang yang ada
   .post(
     "/update/:id",
     async ({ params, body }) => {
       const id = Number(params.id);
       
       if (!Number.isNaN(id)) {
-        // Panggil operasi database lewat Model
         await StokModel.update(id, body.nama, Number(body.harga), Number(body.stok));
       }
 
-      // Selalu redirect via HTMX baik id valid maupun tidak
       return new Response(null, {
         status: 302,
         headers: {
@@ -92,18 +77,14 @@ export const StokController = new Elysia({ prefix: "/admin/stok" })
     }
   )
 
-  // ----------------------------------------------------------
-  // POST /admin/stok/hapus/:id — hapus barang
-  // ----------------------------------------------------------
+  // Hapus barang
   .post("/hapus/:id", async ({ params }) => {
     const id = Number(params.id);
     
     if (!Number.isNaN(id)) {
-      // Panggil operasi database lewat Model
       await StokModel.delete(id);
     }
     
-    // Redirect via HTMX
     return new Response(null, {
       status: 302,
       headers: {
