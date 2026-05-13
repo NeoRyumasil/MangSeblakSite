@@ -31,5 +31,6 @@ CREATE TABLE barang (
 CREATE TABLE menu (
     id_makanan INTEGER PRIMARY KEY,
     nama_makanan TEXT,
-    harga INTEGER
+    harga INTEGER,
+    ImagePath TEXT
 );
