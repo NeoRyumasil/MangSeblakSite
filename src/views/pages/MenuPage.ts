@@ -90,7 +90,8 @@ export const MenuView = {
             
             if (pathDb.includes('MenuImages')) {
               const startIndex = pathDb.indexOf('MenuImages');
-              imgSrc = '/' + pathDb.substring(startIndex);
+              
+              imgSrc = 'https://raw.githubusercontent.com/NeoRyumasil/MangSeblakSite/main/public/' + pathDb.substring(startIndex);
             }
 
             let imgElement = '';

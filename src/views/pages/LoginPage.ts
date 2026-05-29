@@ -99,7 +99,7 @@ export const LoginView = {
 
           <div class="text-center mb-6 sm:mb-8">
             <div class="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 bg-white/10 rounded-2xl shadow-lg mb-4 overflow-hidden">
-              <img src="/Logo/Logo.png" alt="Mang Jay Logo" class="w-full h-full object-contain p-1">
+              <img src="https://raw.githubusercontent.com/NeoRyumasil/MangSeblakSite/main/public/Logo/Logo.png" alt="Mang Jay Logo" class="w-full h-full object-contain p-1">
             </div>
             <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Mang Jay</h1>
             <p class="text-white/50 text-xs sm:text-sm mt-1 font-medium">Panel Admin — Masuk untuk melanjutkan</p>
