@@ -78,3 +78,5 @@ export const app = new Elysia()
   //.listen(3000)
 
 //console.log(`🦊 Web Mang Jay berjalan di http://${app.server?.hostname}:${app.server?.port}`);
+
+export default app;
