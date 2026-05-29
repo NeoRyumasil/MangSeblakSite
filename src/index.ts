@@ -71,4 +71,6 @@ export const app = new Elysia()
     });
   })
 
-console.log(`🦊 Web Mang Jay berjalan di http://${app.server?.hostname}:${app.server?.port}`);
+  //.listen(3000)
+
+//console.log(`🦊 Web Mang Jay berjalan di http://${app.server?.hostname}:${app.server?.port}`);
