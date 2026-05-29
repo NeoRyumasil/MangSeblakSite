@@ -16,7 +16,7 @@ import { StokModel } from "./models/Stok.ts";
 import { PesananModel } from "./models/Pesanan.ts";
 import { StaffModel } from "./models/Staff.ts";
 
-const app = new Elysia()
+export const app = new Elysia()
   .use(html())
   .use(staticPlugin({
     assets: 'public', 
@@ -70,7 +70,5 @@ const app = new Elysia()
       staff: staffDb 
     });
   })
-
-  .listen(3000);
 
 console.log(`🦊 Web Mang Jay berjalan di http://${app.server?.hostname}:${app.server?.port}`);
