@@ -33,7 +33,7 @@ export const app = new Elysia()
       "/", "/menu", "/login", "/auth/login", "/logout", "/auth/logout", "/proses-pesanan"
     ];
 
-    if (path.startsWith("/public")) return;
+    if (path.match(/\.(png|jpg|jpeg|ico|svg)$/i)) return;
 
     if (publicPaths.includes(path)) return;
 
