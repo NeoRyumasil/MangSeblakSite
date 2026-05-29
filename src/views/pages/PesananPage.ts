@@ -34,7 +34,7 @@ const PesananLayout = (title: string, content: string) => `
         <div class="flex items-center justify-between h-16">
           <div class="flex items-center gap-6">
             <a href="/" class="flex items-center gap-3 hover:opacity-90 transition">
-              <img src="/public/Logo/Logo.png" alt="Mang Jay" class="w-9 h-9 object-contain">
+              <img src="/Logo/Logo.png" alt="Mang Jay" class="w-9 h-9 object-contain">
               <span class="text-lg sm:text-xl font-black text-white">Mang Jay</span>
             </a>
             

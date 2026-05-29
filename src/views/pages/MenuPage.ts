@@ -90,7 +90,7 @@ export const MenuView = {
             
             if (pathDb.includes('MenuImages')) {
               const startIndex = pathDb.indexOf('MenuImages');
-              imgSrc = '/public/' + pathDb.substring(startIndex);
+              imgSrc = pathDb.substring(startIndex);
             }
 
             let imgElement = '';

@@ -26,7 +26,7 @@ export const LandingView = {
           
           <div class="w-full md:w-1/2 flex justify-center mt-4 md:mt-0">
             <div class="w-64 h-64 sm:w-72 sm:h-72 md:w-96 md:h-96 bg-orange-50 rounded-full flex items-center justify-center relative shadow-2xl border-4 border-white">
-              <img src="/public/Logo/Logo.png" alt="Seblak Korea Mang Jay" class="w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 object-contain drop-shadow-xl">
+              <img src="/Logo/Logo.png" alt="Seblak Korea Mang Jay" class="w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 object-contain drop-shadow-xl">
             </div>
           </div>
         </div>

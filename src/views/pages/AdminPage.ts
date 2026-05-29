@@ -41,7 +41,7 @@ const Sidebar = (activeTab: string) => `
   <aside class="w-64 shrink-0 hidden lg:flex flex-col bg-[#1e3a5f] min-h-screen fixed top-0 left-0 z-20 pt-0">
     <div class="px-6 py-5 border-b border-white/10">
       <a href="/" class="flex items-center gap-3 hover:opacity-90 transition">
-        <img src="/public/Logo/Logo.png" alt="Mang Jay" class="w-10 h-10 object-contain">
+        <img src="/Logo/Logo.png" alt="Mang Jay" class="w-10 h-10 object-contain">
         <div>
           <span class="text-xl font-black text-white block leading-none">Mang Jay</span>
           <span class="text-xs text-white/40 font-medium">Panel Admin</span>
@@ -81,7 +81,7 @@ const TopBar = (title: string, activeTab: string) => `
   <header class="lg:hidden bg-[#1e3a5f] text-white sticky top-0 z-30 shadow-md">
     <div class="px-5 py-4 flex items-center justify-between">
       <a href="/" class="flex items-center gap-2 hover:opacity-90 transition">
-        <img src="/public/Logo/Logo.png" alt="Mang Jay" class="w-8 h-8 object-contain">
+        <img src="/Logo/Logo.png" alt="Mang Jay" class="w-8 h-8 object-contain">
         <span class="font-black text-lg">Mang Jay Admin</span>
       </a>
       <span class="font-bold text-sm text-white/60 truncate ml-2">${title}</span>
