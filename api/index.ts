@@ -1,4 +1,4 @@
-import { app } from '../src/index.ts';
+import { app } from '../src/index';
 
 export const config = {
     runtime: 'edge'
