@@ -23,7 +23,7 @@ export const app = new Elysia()
       ? (app) => app 
       : staticPlugin({
           assets: 'public', 
-          prefix: '/public' 
+          prefix: '/' 
         })
   )
 
