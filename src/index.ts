@@ -1,4 +1,3 @@
-// file: index.ts
 import { Elysia } from "elysia";
 import { html } from "@elysiajs/html";
 import { staticPlugin } from "@elysiajs/static"; 
@@ -13,32 +12,23 @@ import { StaffController } from "./controllers/StaffController";
 import { MenuController } from "./controllers/MenuController";
 import { PesananController } from "./controllers/PesananController";
 import { MenuModel } from "./models/Menu";
-
-// Models Tambahan Untuk Backend Dashboard Admin
 import { StokModel } from "./models/Stok";
 import { PesananModel } from "./models/Pesanan";
 import { StaffModel } from "./models/Staff";
 
-// ============================================================
-// App
-// ============================================================
-
 const app = new Elysia()
   .use(html())
   .use(staticPlugin({
-    assets: 'public', // Cukup tulis 'public' agar mengarah ke folder root
-    prefix: '/public' // Mengawali URL dengan /public di browser
+    assets: 'public', 
+    prefix: '/public' 
   }))
 
-  // ----------------------------------------------------------
-  // MIDDLEWARE GLOBAL: Wajib Login
-  // ----------------------------------------------------------
+  // Middleware
   .onBeforeHandle(({ cookie: { session }, path }) => {
     const publicPaths = [
       "/", "/menu", "/login", "/auth/login", "/logout", "/auth/logout", "/proses-pesanan"
     ];
 
-    // Izinkan akses ke static files
     if (path.startsWith("/public")) return;
 
     if (publicPaths.includes(path)) return;
@@ -48,34 +38,27 @@ const app = new Elysia()
     }
   })
 
-  // ----------------------------------------------------------
-  // CONTROLLERS (Terkoneksi ke DB)
-  // ----------------------------------------------------------
+  // Controllers
   .use(AuthController)
   .use(StaffController)
   .use(StokController)
   .use(MenuController)
   .use(PesananController) 
 
-  // ----------------------------------------------------------
-  // HALAMAN PUBLIK
-  // ----------------------------------------------------------
+  // Landing View
   .get("/", () => LandingView.HalamanUtama())
   
+  // Login View
   .get("/login", () => LoginView.HalamanLogin())
   .get("/logout", () => new Response(null, { status: 302, headers: { Location: "/auth/logout", "HX-Redirect": "/auth/logout" } }))
 
-  // ----------------------------------------------------------
-  // HALAMAN MENU (Tampilan Saja)
-  // ----------------------------------------------------------
+  // Menu
   .get("/menu", async () => {
     const menusDb = await MenuModel.getAll();
     return MenuView.HalamanMenu(menusDb);
   })
 
-  // ----------------------------------------------------------
-  // ADMIN DASHBOARD (TERKONEKSI KE DB)
-  // ----------------------------------------------------------
+  // Dashboard Admin
   .get("/admin", async () => {
     const stokDb = await StokModel.getAll();
     const pesananDb = await PesananModel.getAll();
@@ -88,9 +71,6 @@ const app = new Elysia()
     });
   })
 
-  // ----------------------------------------------------------
-  // JALANKAN SERVER
-  // ----------------------------------------------------------
   .listen(3000);
 
 console.log(`🦊 Web Mang Jay berjalan di http://${app.server?.hostname}:${app.server?.port}`);

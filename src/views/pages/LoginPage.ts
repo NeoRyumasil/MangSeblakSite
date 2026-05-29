@@ -190,7 +190,6 @@ export const LoginView = {
           }
         }
       </script>
-
     </body>
     </html>
   `
