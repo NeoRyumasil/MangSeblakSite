@@ -2,19 +2,19 @@ import { Elysia } from "elysia";
 import { html } from "@elysiajs/html";
 import { staticPlugin } from "@elysiajs/static"; 
 
-import { LandingView } from './views/pages/LandingPage.ts';
-import { MenuView } from "./views/pages/MenuPage.ts";
-import { LoginView } from "./views/pages/LoginPage.ts";
-import { AdminView } from "./views/pages/AdminPage.ts";
-import { StokController } from "./controllers/StokController.ts";
-import { AuthController } from "./controllers/Auth/AuthController.ts";
-import { StaffController } from "./controllers/StaffController.ts";
-import { MenuController } from "./controllers/MenuController.ts";
-import { PesananController } from "./controllers/PesananController.ts";
-import { MenuModel } from "./models/Menu.ts";
-import { StokModel } from "./models/Stok.ts";
-import { PesananModel } from "./models/Pesanan.ts";
-import { StaffModel } from "./models/Staff.ts";
+import { LandingView } from './views/pages/LandingPage';
+import { MenuView } from "./views/pages/MenuPage";
+import { LoginView } from "./views/pages/LoginPage";
+import { AdminView } from "./views/pages/AdminPage";
+import { StokController } from "./controllers/StokController";
+import { AuthController } from "./controllers/Auth/AuthController";
+import { StaffController } from "./controllers/StaffController";
+import { MenuController } from "./controllers/MenuController";
+import { PesananController } from "./controllers/PesananController";
+import { MenuModel } from "./models/Menu";
+import { StokModel } from "./models/Stok";
+import { PesananModel } from "./models/Pesanan";
+import { StaffModel } from "./models/Staff";
 
 export const app = new Elysia()
   .use(html())
