@@ -18,10 +18,14 @@ import { StaffModel } from "./models/Staff";
 
 export const app = new Elysia()
   .use(html())
-  .use(staticPlugin({
-    assets: 'public', 
-    prefix: '/public' 
-  }))
+  .use(
+    process.env.VERCEL 
+      ? (app) => app 
+      : staticPlugin({
+          assets: 'public', 
+          prefix: '/public' 
+        })
+  )
 
   // Middleware
   .onBeforeHandle(({ cookie: { session }, path }) => {
