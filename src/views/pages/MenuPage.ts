@@ -76,6 +76,12 @@ export const MenuView = {
             <input type="tel" name="no_hp" id="no_hp" required="required" placeholder="Contoh: 08123456789"
               class="w-full bg-white border border-gray-300 text-gray-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition">
           </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm font-bold text-gray-700 mb-2">Alamat Pengiriman <span class="text-xs text-gray-400 font-normal">(Opsional - Khusus Preorder/Delivery)</span></label>
+            <textarea name="alamat" id="alamat" rows="2" placeholder="Masukkan alamat lengkap jika pesanan ini untuk Preorder / Diantar..."
+              class="w-full bg-white border border-gray-300 text-gray-800 rounded-xl px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition"></textarea>
+          </div>
         </div>
 
         <hr class="mb-6 md:mb-8 border-gray-100">
@@ -154,9 +160,13 @@ export const MenuView = {
               <span class="text-gray-500 font-medium">Nama:</span>
               <span id="modal_nama" class="font-bold text-gray-800 uppercase"></span>
             </div>
-            <div class="flex justify-between">
+            <div class="flex justify-between mb-2 border-b border-gray-200 pb-2">
               <span class="text-gray-500 font-medium">No. Telepon:</span>
               <span id="modal_no_hp" class="font-bold text-gray-800"></span>
+            </div>
+            <div id="modal_alamat_container" class="hidden flex justify-between">
+              <span class="text-gray-500 font-medium min-w-[60px]">Alamat:</span>
+              <span id="modal_alamat" class="font-bold text-gray-800 text-right w-3/4 break-words"></span>
             </div>
           </div>
 
@@ -230,6 +240,16 @@ export const MenuView = {
         document.getElementById('modal_no_antrian').innerText = document.getElementById('no_antrian').value;
         document.getElementById('modal_nama').innerText = document.getElementById('nama_pembeli').value;
         document.getElementById('modal_no_hp').innerText = document.getElementById('no_hp').value;
+
+        // Tampilkan Alamat jika diisi
+        const alamat = document.getElementById('alamat').value;
+        const modalAlamatDiv = document.getElementById('modal_alamat_container');
+        if(alamat.trim() !== "") {
+            document.getElementById('modal_alamat').innerText = alamat;
+            modalAlamatDiv.classList.remove('hidden');
+        } else {
+            modalAlamatDiv.classList.add('hidden');
+        }
 
         const listMenuEl = document.getElementById('modal_list_menu');
         listMenuEl.innerHTML = ''; 

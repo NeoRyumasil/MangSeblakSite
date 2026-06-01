@@ -1,8 +1,8 @@
 import { Elysia } from "elysia";
 import { PesananModel } from "../models/Pesanan";
 import { MenuModel } from "../models/Menu";
-import { StokModel } from "../models/Stok"; // Import StokModel untuk mengelola stok
-import { PesananView } from "../views/pages/AdminPage";
+import { StokModel } from "../models/Stok";
+import { PesananView } from "../views/pages/AdminPage"; // Pastikan sudah menggunakan AdminPage jika View-nya disatukan
 
 // Variable untuk nomor antrian
 let counterAntrian = 0;
@@ -46,7 +46,8 @@ export const PesananController = new Elysia()
       nama: input.nama_pembeli,
       no_hp: input.no_hp,
       items: JSON.stringify(itemsSelected),
-      total_harga: totalHarga
+      total_harga: totalHarga,
+      alamat: input.alamat || "" 
     });
 
     return `
@@ -67,10 +68,13 @@ export const PesananController = new Elysia()
     
     const pesananBelumSelesai = semuaPesanan.filter(p => p.status === 'Menunggu' || p.status === 'Diproses');
     
+    // PENTING: Hanya hitung pendapatan jika status bayar = 'Lunas' atau 1
+    const pesananLunas = semuaPesanan.filter(p => p.status_bayar === 'Lunas');
+    
     const stats = {
       total: semuaPesanan.length,
       belum: pesananBelumSelesai.length,
-      untung: semuaPesanan.reduce((sum, p) => sum + p.total_harga, 0),
+      untung: pesananLunas.reduce((sum, p) => sum + p.total_harga, 0),
       stok: 0 
     };
 
@@ -79,8 +83,12 @@ export const PesananController = new Elysia()
       id: p.id_pesanan,
       no_antrian: p.no_antrian,
       nama_pelanggan: p.nama,
+      no_hp: p.no_hp,
       catatan: `HP: ${p.no_hp}`, 
       status: p.status, 
+      status_bayar: p.status_bayar,
+      status_makanan: p.status_makanan,
+      alamat: p.alamat,
       items: p.items,
       total_harga: p.total_harga
     }));
@@ -101,7 +109,7 @@ export const PesananController = new Elysia()
     });
   })
   
-  // Selesaikan pesanan dan potong stok
+  // Selesaikan pesanan (Geser jadi Lunas, Siap, Selesai dan Potong Stok)
   .post("/admin/selesaikan/:id", async ({ params }) => {
     const id = Number(params.id);
     if (!isNaN(id)) {
@@ -120,6 +128,9 @@ export const PesananController = new Elysia()
         }
 
         await PesananModel.updateStatus(id, 'Selesai');
+        // PENTING: Jika di-klik selesai semua, otomatis update yg lain juga
+        await PesananModel.updateStatusMakanan(id, 'Selesai');
+        await PesananModel.updateStatusBayar(id, 'Lunas');
       }
     }
     
@@ -131,8 +142,8 @@ export const PesananController = new Elysia()
       },
     });
   })
-  
-  // Batalkan penyelesaian pesanan
+
+  // Batalkan Keseluruhan Pesanan
   .post("/admin/batal-selesaikan/:id", async ({ params }) => {
     const id = Number(params.id);
     if (!isNaN(id)) {
@@ -146,4 +157,30 @@ export const PesananController = new Elysia()
         "HX-Redirect": "/pesanan",
       },
     });
+  })
+
+  // Kontrol Individual Makanan
+  .post("/admin/selesaikan-makanan/:id", async ({ params }) => {
+    const id = Number(params.id);
+    if (!isNaN(id)) await PesananModel.updateStatusMakanan(id, 'Selesai');
+    return new Response(null, { status: 302, headers: { Location: "/pesanan", "HX-Redirect": "/pesanan" } });
+  })
+  
+  .post("/admin/batal-makanan/:id", async ({ params }) => {
+    const id = Number(params.id);
+    if (!isNaN(id)) await PesananModel.updateStatusMakanan(id, 'Belum');
+    return new Response(null, { status: 302, headers: { Location: "/pesanan", "HX-Redirect": "/pesanan" } });
+  })
+
+  // Kontrol Individual Pembayaran
+  .post("/admin/selesaikan-bayar/:id", async ({ params }) => {
+    const id = Number(params.id);
+    if (!isNaN(id)) await PesananModel.updateStatusBayar(id, 'Lunas'); 
+    return new Response(null, { status: 302, headers: { Location: "/pesanan", "HX-Redirect": "/pesanan" } });
+  })
+  
+  .post("/admin/batal-bayar/:id", async ({ params }) => {
+    const id = Number(params.id);
+    if (!isNaN(id)) await PesananModel.updateStatusBayar(id, 'Belum');
+    return new Response(null, { status: 302, headers: { Location: "/pesanan", "HX-Redirect": "/pesanan" } });
   });

@@ -16,6 +16,8 @@ type Pesanan = {
   status: string;
   status_bayar: number;
   no_hp: string;
+  alamat?: string;
+  status_makanan?: string;
 };
 
 // Model Staff
@@ -167,7 +169,9 @@ export const AdminView = {
     const { stok, pesanan, staff } = data;
     const stokAktif = stok.filter(s => s.stok > 0).length;
     const totalPesananAll = pesanan.length;
-    const totalPendapatanAll = pesanan.reduce((sum, p) => sum + p.total_harga, 0);
+    const pesananLunas = pesanan.filter(p => (p.status_bayar as unknown as string) === 'Lunas' || p.status_bayar === 1 || (p.status_bayar as unknown as string) === '1');
+    const totalPendapatanAll = pesananLunas.reduce((sum, p) => sum + p.total_harga, 0);
+    
     const staffAktif = staff.filter(s => s.aktif).length;
 
     const content = `
@@ -184,7 +188,7 @@ export const AdminView = {
             <p class="text-2xl sm:text-3xl font-black text-gray-800">${totalPesananAll}</p>
           </div>
           <div class="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm border-l-4 border-green-500">
-            <p class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Pendapatan Kotor</p>
+            <p class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Pendapatan Lunas</p>
             <p class="text-lg sm:text-2xl font-black text-gray-800 truncate">Rp ${totalPendapatanAll.toLocaleString("id-ID")}</p>
           </div>
           <div class="bg-white rounded-2xl p-4 sm:p-6 border border-gray-100 shadow-sm border-l-4 border-yellow-500">
@@ -237,7 +241,7 @@ export const AdminView = {
   }
 };
 
-// View untuk halaman manajemen pesanan
+// View untuk halaman manajemen pesanan (Desain Kartu dengan Tombol Status)
 export const PesananView = {
   HalamanPesanan: (stats: any, pesananAktif: any[]) => {
     const content = `
@@ -247,81 +251,132 @@ export const PesananView = {
             <p class="text-[10px] sm:text-xs font-bold text-red-600 uppercase tracking-widest mb-1">Penjualan</p>
             <h1 class="text-2xl sm:text-3xl font-black text-gray-900">Kelola Pesanan</h1>
           </div>
-          <button hx-post="/admin/reset-antrian" hx-target="body" hx-confirm="Reset urutan antrian ke 1?" class="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-xl text-sm sm:text-base font-bold hover:bg-red-100 transition shadow-sm flex items-center gap-2 w-full md:w-auto justify-center">
+          <button hx-post="/admin/reset-antrian" hx-target="body" hx-confirm="Apakah Anda yakin ingin mereset urutan nomor antrian kembali ke 1?" class="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-xl text-sm sm:text-base font-bold hover:bg-red-100 transition shadow-sm flex items-center gap-2 w-full md:w-auto justify-center">
             🔄 Reset No. Antrian
           </button>
         </div>
         
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-          <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-[#1e3a5f]">
-            <p class="text-[10px] sm:text-xs text-gray-400 font-bold uppercase mb-1">Total</p>
+          <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-[#1e3a5f]">
+            <p class="text-[10px] sm:text-xs text-gray-400 font-bold uppercase mb-1">Total Pesanan</p>
             <p class="text-xl sm:text-3xl font-black">${stats.total}</p>
           </div>
-          <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-yellow-500">
-            <p class="text-[10px] sm:text-xs text-gray-400 font-bold uppercase mb-1">Menunggu</p>
+          <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-yellow-500">
+            <p class="text-[10px] sm:text-xs text-gray-400 font-bold uppercase mb-1">Belum Selesai</p>
             <p class="text-xl sm:text-3xl font-black">${stats.belum}</p>
           </div>
-          <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-green-500">
-            <p class="text-[10px] sm:text-xs text-gray-400 font-bold uppercase mb-1">Pendapatan</p>
+          <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-green-500">
+            <p class="text-[10px] sm:text-xs text-gray-400 font-bold uppercase mb-1">Pendapatan Lunas</p>
             <p class="text-lg sm:text-2xl font-black text-green-600 truncate">Rp ${stats.untung.toLocaleString('id-ID')}</p>
           </div>
-          <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-red-600">
+          <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-red-600">
             <p class="text-[10px] sm:text-xs text-gray-400 font-bold uppercase mb-1">Sisa Stok</p>
             <p class="text-xl sm:text-2xl font-black">${stats.stok} Porsi</p>
           </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
-          <div class="p-4 sm:p-5 border-b border-gray-50 flex justify-between items-center">
-            <h2 class="text-base sm:text-lg font-black text-gray-800">Daftar Antrian</h2>
-            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">${pesananAktif.length} Antrian</span>
-          </div>
-          <div class="overflow-x-auto w-full">
-            <table class="w-full text-left min-w-[700px]">
-              <thead class="bg-gray-50 text-gray-500 text-[10px] sm:text-xs uppercase tracking-wide">
-                <tr>
-                  <th class="px-4 py-3 sm:px-5 sm:py-4">No</th>
-                  <th class="px-4 py-3 sm:px-5 sm:py-4">Pemesan</th>
-                  <th class="px-4 py-3 sm:px-5 sm:py-4">Pesanan</th>
-                  <th class="px-4 py-3 sm:px-5 sm:py-4">Total</th>
-                  <th class="px-4 py-3 sm:px-5 sm:py-4">Aksi</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-50 text-sm">
-                ${pesananAktif.map((p: any) => {
-                  let detailItem = "-";
-                  try {
-                    const items = JSON.parse(p.items);
-                    detailItem = items.map((i: any) => `${i.nama} (x${i.qty})`).join(", ");
-                  } catch (e) {}
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Daftar Antrian</h2>
+          <span class="bg-blue-100 text-blue-700 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm">${pesananAktif.length} Antrian</span>
+        </div>
+
+        <!-- DAFTAR PESANAN DENGAN KARTU YANG LEBIH SEDERHANA -->
+        <div class="flex flex-col gap-4">
+          ${pesananAktif.length === 0 ? '<div class="bg-white p-10 rounded-2xl text-center text-gray-400 italic font-medium border border-gray-100 shadow-sm">Belum ada pesanan yang masuk.</div>' : ''}
+          
+          ${pesananAktif.map((p: any) => {
+            let detailItem = "-";
+            let totalQty = 0;
+            try {
+              const items = JSON.parse(p.items);
+              detailItem = items.map((i: any) => `${i.nama} <strong class="text-red-500">(x${i.qty})</strong>`).join(", ");
+              totalQty = items.reduce((sum: number, i: any) => sum + i.qty, 0);
+            } catch (e) {
+              detailItem = p.items;
+            }
+            
+            const isSelesai = p.status === 'Selesai';
+            const isBayarLunas = p.status_bayar === 'Lunas' || p.status_bayar === 1 || p.status_bayar === '1';
+            const isMakananSiap = p.status_makanan === 'Selesai';
+            
+            const noHpBersih = p.catatan ? p.catatan.replace('HP: ', '').trim() : (p.no_hp || '-');
+            const namaPelanggan = p.nama_pelanggan || p.nama || 'Tanpa Nama'; 
+            
+            const alamat = (p.alamat && p.alamat.trim() !== '') ? p.alamat : '-';
+
+            return `
+              <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden ${isSelesai ? 'opacity-70 bg-gray-50' : 'hover:shadow-md transition'}">
+                <div class="p-4 sm:p-5">
                   
-                  const isSelesai = p.status === 'Selesai';
-                  return `
-                    <tr class="${isSelesai ? 'bg-gray-50 opacity-60' : 'hover:bg-orange-50/40 transition bg-white'}">
-                      <td class="px-4 py-3 sm:px-5 sm:py-4 font-black text-base sm:text-lg ${isSelesai ? 'text-gray-400' : 'text-[#1e3a5f]'}">#${p.no_antrian}</td>
-                      <td class="px-4 py-3 sm:px-5 sm:py-4">
-                        <p class="font-bold text-gray-800 whitespace-nowrap">${p.nama_pelanggan}</p>
-                        <p class="text-[10px] font-mono text-gray-400 uppercase">${p.catatan}</p>
-                      </td>
-                      <td class="px-4 py-3 sm:px-5 sm:py-4 text-[10px] sm:text-xs">
-                        <p class="text-gray-700 font-semibold ${isSelesai ? 'line-through' : ''}">${detailItem}</p>
-                      </td>
-                      <td class="px-4 py-3 sm:px-5 sm:py-4 font-bold ${isSelesai ? 'text-gray-500' : 'text-green-600'} text-xs sm:text-sm whitespace-nowrap">Rp ${p.total_harga.toLocaleString('id-ID')}</td>
-                      <td class="px-4 py-3 sm:px-5 sm:py-4">
-                        ${isSelesai 
-                          ? `<button hx-post="/admin/batal-selesaikan/${p.id}" hx-target="body" class="bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase transition whitespace-nowrap">Batal</button>`
-                          : `<button hx-post="/admin/selesaikan/${p.id}" hx-target="body" class="bg-green-600 text-white px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase shadow-sm transition whitespace-nowrap">✅ Selesai</button>`
-                        }
-                      </td>
-                    </tr>
-                  `;
-                }).join('')}
-              </tbody>
-            </table>
-          </div>
+                  <!-- Header Kartu -->
+                  <div class="flex justify-between items-start mb-4 border-b border-gray-100 pb-3">
+                    <div class="flex items-center gap-3">
+                      <div class="bg-[#1e3a5f] text-white w-10 h-10 rounded-lg flex items-center justify-center font-black text-xl shadow-inner">
+                        ${p.no_antrian}
+                      </div>
+                      <div>
+                        <h3 class="font-bold text-lg text-gray-800 leading-none mb-1">${namaPelanggan}</h3>
+                        <p class="text-xs text-gray-500 font-medium">📞 ${noHpBersih}</p>
+                      </div>
+                    </div>
+                    ${isSelesai 
+                      ? `<span class="bg-green-100 text-green-800 border border-green-200 px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider">✅ Selesai</span>` 
+                      : `<span class="bg-yellow-100 text-yellow-800 border border-yellow-200 px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider shadow-sm">⏳ Sedang Diproses</span>`
+                    }
+                  </div>
+
+                  <!-- Detail Pesanan & Alamat -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-sm">
+                    <div class="space-y-3">
+                      <div>
+                        <span class="block text-[10px] font-bold text-gray-400 uppercase">Alamat</span>
+                        <p class="font-medium text-gray-800 break-words">${alamat}</p>
+                      </div>
+                      <div>
+                        <span class="block text-[10px] font-bold text-gray-400 uppercase">Pesanan (${totalQty} item)</span>
+                        <p class="text-gray-700 font-medium leading-relaxed ${isSelesai ? 'line-through text-gray-400' : ''}">${detailItem}</p>
+                      </div>
+                    </div>
+                    <div class="md:text-right">
+                      <span class="block text-[10px] font-bold text-gray-400 uppercase">Total Tagihan</span>
+                      <p class="text-2xl font-black text-red-600 mt-1">Rp ${p.total_harga.toLocaleString('id-ID')}</p>
+                    </div>
+                  </div>
+
+                  <!-- Bar Aksi Tombol (Bergaya Badge Status) -->
+                  <div class="flex flex-col sm:flex-row flex-wrap gap-2 items-center justify-between bg-gray-50 -mx-4 -mb-4 sm:-mx-5 sm:-mb-5 p-3 sm:p-4 border-t border-gray-100">
+                    <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                      
+                      <!-- Status Pembayaran (Berada di kiri, diklik untuk ubah status) -->
+                      ${isBayarLunas
+                         ? `<button hx-post="/admin/batal-bayar/${p.id}" hx-target="body" title="Klik untuk membatalkan status bayar" class="flex-1 sm:flex-none bg-green-50 text-green-700 border border-green-200 px-3 py-2 rounded-lg font-bold text-xs hover:bg-green-100 transition text-center shadow-sm">✅ Sudah Lunas</button>`
+                         : `<button hx-post="/admin/selesaikan-bayar/${p.id}" hx-target="body" title="Klik untuk menandai lunas" class="flex-1 sm:flex-none bg-red-50 text-red-600 border border-red-200 px-3 py-2 rounded-lg font-bold text-xs hover:bg-red-100 transition text-center shadow-sm">❌ Belum Lunas</button>`
+                      }
+                      
+                      <!-- Status Makanan (Berada di kanan, diklik untuk ubah status) -->
+                      ${isMakananSiap
+                         ? `<button hx-post="/admin/batal-makanan/${p.id}" hx-target="body" title="Klik untuk membatalkan status makanan" class="flex-1 sm:flex-none bg-green-50 text-green-700 border border-green-200 px-3 py-2 rounded-lg font-bold text-xs hover:bg-green-100 transition text-center shadow-sm">✅ Makanan Siap</button>`
+                         : `<button hx-post="/admin/selesaikan-makanan/${p.id}" hx-target="body" title="Klik untuk menandai makanan siap" class="flex-1 sm:flex-none bg-orange-50 text-orange-600 border border-orange-200 px-3 py-2 rounded-lg font-bold text-xs hover:bg-orange-100 transition text-center shadow-sm">🍳 Makanan Belum Siap</button>`
+                      }
+                    </div>
+                    
+                    <!-- Tombol Selesai Semua -->
+                    <div class="w-full sm:w-auto mt-2 sm:mt-0">
+                      ${isSelesai
+                         ? `<button hx-post="/admin/batal-selesaikan/${p.id}" hx-target="body" class="w-full sm:w-auto bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold text-xs hover:bg-gray-300 transition text-center border border-gray-300">Batalkan Selesai</button>`
+                         : `<button hx-post="/admin/selesaikan/${p.id}" hx-target="body" class="w-full sm:w-auto bg-[#1e3a5f] text-white px-4 py-2 rounded-lg font-bold text-xs hover:bg-[#152d4a] shadow-sm transition text-center">✅ Selesai Keseluruhan</button>`
+                      }
+                    </div>
+                  </div>
+                  
+                </div>
+              </div>
+            `;
+          }).join('')}
         </div>
       </div>
     `; 
+
     return AdminLayout("Kelola Pesanan", "pesanan", content);
   }
 };

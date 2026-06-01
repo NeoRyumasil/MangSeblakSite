@@ -64,7 +64,7 @@ const PesananLayout = (title: string, content: string) => `
       </div>
     </nav>
 
-    <main class="flex-1 w-full">
+    <main class="flex-1 w-full pb-10">
       ${content}
     </main>
   </body>
@@ -103,76 +103,115 @@ export const PesananView = {
           </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
-          <div class="p-4 sm:p-6 border-b border-gray-50 flex justify-between items-center">
-            <h2 class="text-lg sm:text-xl font-bold">Daftar Antrian</h2>
-            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">${pesananAktif.length} Antrian</span>
-          </div>
-          <div class="overflow-x-auto w-full">
-            <table class="w-full text-left min-w-[700px]">
-              <thead class="bg-gray-50 text-gray-600 text-xs sm:text-sm uppercase">
-                <tr>
-                  <th class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">No</th>
-                  <th class="px-4 sm:px-6 py-3 sm:py-4">Nama Pemesan</th>
-                  <th class="px-4 sm:px-6 py-3 sm:py-4">No. Telepon</th>
-                  <th class="px-4 sm:px-6 py-3 sm:py-4">Pesanan</th>
-                  <th class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">Total Harga</th>
-                  <th class="px-4 sm:px-6 py-3 sm:py-4">Aksi</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-100 text-sm">
-                ${pesananAktif.map((p: any) => {
-                  let detailItem = p.items;
-                  let totalQty = 0;
-                  try {
-                    const items = JSON.parse(p.items);
-                    detailItem = items.map((i: any) => `${i.nama} (x${i.qty})`).join(", ");
-                    totalQty = items.reduce((sum: number, i: any) => sum + i.qty, 0);
-                  } catch (e) {
-                    // Fallback apabila JSON gagal di-parse
-                  }
-                  
-                  const isSelesai = p.status === 'Selesai';
-                  const rowClass = isSelesai ? 'bg-gray-50 opacity-60' : 'hover:bg-gray-50 transition bg-white';
-                  const badgeStatus = isSelesai 
-                    ? '<span class="inline-block mt-1 bg-green-100 text-green-800 text-[10px] uppercase font-bold px-2 py-1 rounded">Selesai</span>' 
-                    : '<span class="inline-block mt-1 bg-yellow-100 text-yellow-800 text-[10px] uppercase font-bold px-2 py-1 rounded">Menunggu</span>';
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Daftar Antrian</h2>
+          <span class="bg-blue-100 text-blue-700 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm">${pesananAktif.length} Antrian</span>
+        </div>
 
-                  const noHpBersih = p.catatan ? p.catatan.replace('HP: ', '').trim() : '-';
+        <div class="flex flex-col gap-6">
+          ${pesananAktif.length === 0 ? '<div class="bg-white p-10 rounded-2xl text-center text-gray-400 italic font-medium border border-gray-100 shadow-sm">Belum ada pesanan yang masuk.</div>' : ''}
+          
+          ${pesananAktif.map((p: any) => {
+            let detailItem = p.items;
+            let totalQty = 0;
+            try {
+              const items = JSON.parse(p.items);
+              detailItem = items.map((i: any) => `${i.nama} <strong class="text-red-500">(x${i.qty})</strong>`).join("<br/>");
+              totalQty = items.reduce((sum: number, i: any) => sum + i.qty, 0);
+            } catch (e) {
+              console.error("Error: ", e)
+            }
+            
+            const isSelesai = p.status === 'Selesai';
+            const isBayarLunas = p.status_bayar === 'Lunas' || p.status_bayar === 1;
+            const isMakananSiap = p.status_makanan === 'Selesai';
+            const noHpBersih = p.catatan ? p.catatan.replace('HP: ', '').trim() : '-';
 
-                  const tombolAksi = isSelesai 
-                    ? `<button hx-post="/admin/batal-selesaikan/${p.id}" hx-target="body" class="bg-gray-200 text-gray-600 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-bold hover:bg-gray-300 hover:text-gray-800 transition text-xs sm:text-sm shadow-sm whitespace-nowrap">
-                        Batalkan Selesai
-                      </button>`
-                    : `<button hx-post="/admin/selesaikan/${p.id}" hx-target="body" class="bg-green-500 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-bold hover:bg-green-600 transition text-xs sm:text-sm shadow-sm whitespace-nowrap">
-                        Selesaikan
-                      </button>`;
+            return `
+              <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden ${isSelesai ? 'opacity-70 bg-gray-50' : 'hover:shadow-md transition'}">
+                
+                <div class="bg-gray-50 border-b border-gray-100 p-4 sm:p-5 flex justify-between items-center">
+                   <div class="flex items-center gap-4">
+                      <div class="bg-[#1e3a5f] text-white w-14 h-14 rounded-xl flex items-center justify-center font-black text-2xl shadow-inner">
+                         ${p.no_antrian}
+                      </div>
+                      <div>
+                         <h3 class="font-bold text-xl text-gray-800">${p.nama_pelanggan}</h3>
+                         <p class="text-sm text-gray-500 font-medium mt-0.5">📞 ${noHpBersih}</p>
+                      </div>
+                   </div>
+                   ${isSelesai 
+                     ? `<span class="bg-green-100 text-green-800 border border-green-200 px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider">✅ Selesai</span>` 
+                     : `<span class="bg-yellow-100 text-yellow-800 border border-yellow-200 px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider shadow-sm">⏳ Sedang Diproses</span>`
+                   }
+                </div>
 
-                  return `
-                    <tr class="${rowClass}">
-                      <td class="px-4 sm:px-6 py-3 sm:py-4 font-black text-lg sm:text-xl ${isSelesai ? 'text-gray-400' : 'text-[#1e3a5f]'}">#${p.no_antrian}</td>
-                      <td class="px-4 sm:px-6 py-3 sm:py-4">
-                        <p class="font-bold text-base sm:text-lg whitespace-nowrap">${p.nama_pelanggan}</p>
-                        ${badgeStatus}
-                      </td>
-                      <td class="px-4 sm:px-6 py-3 sm:py-4">
-                        <p class="text-xs sm:text-sm font-medium text-gray-700 bg-gray-100 px-2 sm:px-3 py-1 rounded-lg inline-block whitespace-nowrap">${noHpBersih}</p>
-                      </td>
-                      <td class="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm">
-                        <p class="text-gray-700 font-medium ${isSelesai ? 'line-through decoration-2 decoration-gray-400' : ''}">${detailItem}</p>
-                        <p class="text-[10px] sm:text-xs text-gray-400 font-bold mt-1">${totalQty > 0 ? `${totalQty} Barang` : ''}</p>
-                      </td>
-                      <td class="px-4 sm:px-6 py-3 sm:py-4 font-bold ${isSelesai ? 'text-gray-500' : 'text-red-600'} text-base sm:text-lg whitespace-nowrap">Rp ${p.total_harga.toLocaleString('id-ID')}</td>
-                      <td class="px-4 sm:px-6 py-3 sm:py-4">
-                        ${tombolAksi}
-                      </td>
-                    </tr>
-                  `;
-                }).join('')}
-              </tbody>
-            </table>
-            ${pesananAktif.length === 0 ? '<p class="p-10 text-center text-gray-400 italic font-medium">Belum ada pesanan yang masuk.</p>' : ''}
-          </div>
+                <div class="p-4 sm:p-6 flex flex-col md:flex-row gap-6">
+                   
+                   <div class="flex-1 flex flex-col gap-4">
+                      
+                      ${p.alamat ? `
+                      <div>
+                         <span class="block text-xs font-bold text-gray-400 uppercase mb-1.5">Alamat Pengiriman (Preorder)</span>
+                         <div class="bg-blue-50 text-blue-900 border border-blue-100 p-3.5 rounded-xl text-sm font-medium leading-relaxed">
+                            📍 ${p.alamat}
+                         </div>
+                      </div>
+                      ` : ''}
+
+                      <div>
+                         <span class="block text-xs font-bold text-gray-400 uppercase mb-1.5">Daftar Makanan yang Dipesan</span>
+                         <div class="bg-gray-50 border border-gray-100 p-4 rounded-xl">
+                            <p class="text-gray-800 font-medium leading-relaxed ${isSelesai ? 'line-through text-gray-500' : ''}">${detailItem}</p>
+                            <div class="mt-4 pt-4 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2">
+                               <span class="text-xs font-bold text-gray-500 bg-gray-200 px-3 py-1 rounded-full">${totalQty} Total Barang</span>
+                               <div class="text-left sm:text-right w-full sm:w-auto">
+                                  <span class="block text-[10px] font-bold text-gray-400 uppercase">Total Tagihan</span>
+                                  <span class="text-2xl font-black text-red-600 block mt-0.5">Rp ${p.total_harga.toLocaleString('id-ID')}</span>
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+                   </div>
+
+                   <div class="w-full md:w-80 flex flex-col gap-4 border-t md:border-t-0 md:border-l border-gray-100 pt-5 md:pt-0 md:pl-6">
+                      <span class="block text-xs font-bold text-gray-400 uppercase">Kontrol Status (Aksi)</span>
+                      
+                      <div class="bg-orange-50 border border-orange-100 p-3.5 rounded-xl flex flex-col gap-2.5 shadow-sm">
+                         <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-orange-900">Dapur / Makanan:</span>
+                            ${isMakananSiap 
+                               ? '<span class="bg-green-500 text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase shadow-sm">Siap</span>' 
+                               : '<span class="bg-orange-200 text-orange-800 px-2 py-0.5 rounded text-[10px] font-bold uppercase border border-orange-300">Dimasak</span>'}
+                         </div>
+                         ${isMakananSiap 
+                            ? `<button hx-post="/admin/batal-makanan/${p.id}" hx-target="body" class="w-full bg-white text-orange-600 border border-orange-200 px-3 py-2.5 rounded-lg font-bold hover:bg-orange-100 transition text-xs text-center flex items-center justify-center gap-1.5">🔄 Batal (Makanan)</button>`
+                            : `<button hx-post="/admin/selesaikan-makanan/${p.id}" hx-target="body" class="w-full bg-orange-500 text-white px-3 py-2.5 rounded-lg font-bold hover:bg-orange-600 transition text-xs shadow text-center flex items-center justify-center gap-1.5">🍳 Tandai Makanan Siap</button>`}
+                      </div>
+
+                      <div class="bg-blue-50 border border-blue-100 p-3.5 rounded-xl flex flex-col gap-2.5 shadow-sm">
+                         <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-blue-900">Pembayaran:</span>
+                            ${isBayarLunas 
+                               ? '<span class="bg-green-500 text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase shadow-sm">Lunas</span>' 
+                               : '<span class="bg-red-500 text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase shadow-sm">Belum Bayar</span>'}
+                         </div>
+                         ${isBayarLunas
+                            ? `<button hx-post="/admin/batal-bayar/${p.id}" hx-target="body" class="w-full bg-white text-blue-600 border border-blue-200 px-3 py-2.5 rounded-lg font-bold hover:bg-blue-100 transition text-xs text-center flex items-center justify-center gap-1.5">🔄 Batal (Bayar)</button>`
+                            : `<button hx-post="/admin/selesaikan-bayar/${p.id}" hx-target="body" class="w-full bg-blue-600 text-white px-3 py-2.5 rounded-lg font-bold hover:bg-blue-700 transition text-xs shadow text-center flex items-center justify-center gap-1.5">💵 Tandai Lunas</button>`}
+                      </div>
+
+                      <div class="mt-auto pt-3 border-t border-gray-100">
+                         ${isSelesai
+                            ? `<button hx-post="/admin/batal-selesaikan/${p.id}" hx-target="body" class="w-full bg-gray-200 text-gray-700 border border-gray-300 px-4 py-3.5 rounded-xl font-bold hover:bg-gray-300 transition text-sm text-center">Batalkan Selesai Semua</button>`
+                            : `<button hx-post="/admin/selesaikan/${p.id}" hx-target="body" class="w-full bg-green-600 text-white px-4 py-3.5 rounded-xl font-bold hover:bg-green-700 shadow-md shadow-green-900/20 transition text-sm text-center">✅ Selesaikan Pesanan</button>`}
+                      </div>
+
+                   </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
         </div>
       </div>
     `; 
