@@ -11,7 +11,8 @@ export type Pesanan = {
   status_bayar: string; 
   no_hp: string;
   alamat?: string;    
-  status_makanan?: string; 
+  status_makanan?: string;
+  voucher?: string;
 };
 
 // Model DTO Pesanan Baru
@@ -21,7 +22,8 @@ export type CreatePesananDTO = {
   no_hp: string;
   items: string;
   total_harga: number;
-  alamat?: string; 
+  alamat?: string;
+  voucher?: string;
 };
 
 // SQL untuk Model Pesanan
@@ -30,8 +32,8 @@ export const PesananModel = {
   // Tambah pesanan baru
   create: async (data: CreatePesananDTO): Promise<void> => {
     await db.execute({
-      sql: `INSERT INTO pesanan (no_antrian, nama, no_hp, items, total_harga, status, status_bayar, alamat, status_makanan) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      sql: `INSERT INTO pesanan (no_antrian, nama, no_hp, items, total_harga, status, status_bayar, alamat, status_makanan, voucher) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
         data.no_antrian, 
         data.nama, 
@@ -41,7 +43,8 @@ export const PesananModel = {
         "Menunggu",  
         "Belum",    
         data.alamat || null,
-        "Belum"      
+        "Belum",
+        data.voucher || "Tidak" 
       ],
     });
   },
@@ -49,7 +52,7 @@ export const PesananModel = {
   // Ambil semua pesanan dengan urutan terbaru
   getAll: async (): Promise<Pesanan[]> => {
     const result = await db.execute(
-      "SELECT id_pesanan, no_antrian, nama, items, total_harga, status, status_bayar, no_hp, alamat, status_makanan FROM pesanan ORDER BY id_pesanan DESC"
+      "SELECT id_pesanan, no_antrian, nama, items, total_harga, status, status_bayar, no_hp, alamat, status_makanan, voucher FROM pesanan ORDER BY id_pesanan DESC"
     );
     return result.rows as unknown as Pesanan[];
   },
@@ -84,6 +87,14 @@ export const PesananModel = {
     await db.execute({
       sql: "UPDATE pesanan SET status_makanan = ? WHERE id_pesanan = ?",
       args: [statusBaru, id],
+    });
+  },
+
+  // FUNGSI BARU: Update Voucher & Harga
+  updateVoucher: async (id: number, statusVoucher: string, hargaBaru: number): Promise<void> => {
+    await db.execute({
+      sql: "UPDATE pesanan SET voucher = ?, total_harga = ? WHERE id_pesanan = ?",
+      args: [statusVoucher, hargaBaru, id],
     });
   },
 

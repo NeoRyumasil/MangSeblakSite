@@ -18,6 +18,7 @@ type Pesanan = {
   no_hp: string;
   alamat?: string;
   status_makanan?: string;
+  voucher?: string; 
 };
 
 // Model Staff
@@ -146,16 +147,12 @@ const AdminLayout = (title: string, activeTab: string, content: string) => `
   </html>
 `;
 
-// Badge untuk status stok
 const badgeStok = (stok: number) => {
-  if (stok === 0)
-    return `<span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold bg-red-100 text-red-700 whitespace-nowrap">Habis</span>`;
-  if (stok <= 5)
-    return `<span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold bg-yellow-100 text-yellow-700 whitespace-nowrap">Hampir Habis</span>`;
+  if (stok === 0) return `<span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold bg-red-100 text-red-700 whitespace-nowrap">Habis</span>`;
+  if (stok <= 5) return `<span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold bg-yellow-100 text-yellow-700 whitespace-nowrap">Hampir Habis</span>`;
   return `<span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold bg-green-100 text-green-700 whitespace-nowrap">Aman</span>`;
 };
 
-// Badge untuk role staff
 const badgeRole: Record<Staff["role"], string> = {
   admin: `<span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold bg-red-100 text-red-700 whitespace-nowrap">Admin</span>`,
   kasir: `<span class="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold bg-blue-100 text-blue-700 whitespace-nowrap">Kasir</span>`,
@@ -169,6 +166,7 @@ export const AdminView = {
     const { stok, pesanan, staff } = data;
     const stokAktif = stok.filter(s => s.stok > 0).length;
     const totalPesananAll = pesanan.length;
+    
     const pesananLunas = pesanan.filter(p => p.status_bayar === 'Lunas');
     const totalPendapatanAll = pesananLunas.reduce((sum, p) => sum + p.total_harga, 0);
     
@@ -295,13 +293,12 @@ export const PesananView = {
             }
             
             const isSelesai = p.status === 'Selesai';
-            const isBayarLunas = p.status_bayar === 'Lunas'; // Cukup cek string 'Lunas'
+            const isBayarLunas = p.status_bayar === 'Lunas';
             const isMakananSiap = p.status_makanan === 'Selesai';
             
             const noHpBersih = p.catatan ? p.catatan.replace('HP: ', '').trim() : (p.no_hp || '-');
             const namaPelanggan = p.nama_pelanggan || p.nama || 'Tanpa Nama'; 
             
-            // Format Alamat (Tampilkan - jika tidak ada)
             const alamat = (p.alamat && p.alamat.trim() !== '') ? p.alamat : '-';
 
             return `
@@ -335,9 +332,16 @@ export const PesananView = {
                         <p class="text-gray-700 font-medium leading-relaxed ${isSelesai ? 'line-through text-gray-400' : ''}">${detailItem}</p>
                       </div>
                     </div>
+                    
+                    <!-- AREA TOTAL HARGA & TOMBOL VOUCHER -->
                     <div class="md:text-right">
                       <span class="block text-[10px] font-bold text-gray-400 uppercase">Total Tagihan</span>
-                      <p class="text-2xl font-black text-red-600 mt-1">Rp ${p.total_harga.toLocaleString('id-ID')}</p>
+                      <p class="text-2xl font-black text-red-600 mt-1 mb-1">Rp ${p.total_harga.toLocaleString('id-ID')}</p>
+                      
+                      ${p.voucher === 'Ya' 
+                         ? `<button hx-post="/admin/toggle-voucher/${p.id}" hx-target="body" title="Klik untuk membatalkan diskon" class="inline-block bg-red-100 text-red-700 hover:bg-red-200 border border-red-200 px-2 py-1 rounded text-[10px] font-bold tracking-wider transition">🎟️ VOUCHER DIPAKAI (-3K) ❌</button>` 
+                         : `<button hx-post="/admin/toggle-voucher/${p.id}" hx-target="body" title="Klik untuk pakai diskon Rp 3.000" class="inline-block bg-gray-50 text-gray-600 hover:bg-green-100 hover:text-green-700 border border-gray-200 px-2 py-1 rounded text-[10px] font-bold tracking-wider transition">➕ TAMBAH VOUCHER DISKON</button>`
+                      }
                     </div>
                   </div>
 
@@ -375,7 +379,6 @@ export const PesananView = {
   }
 };
 
-// View untuk halaman manajemen stok
 export const StokView = {
   HalamanStok: (barang: Barang[]) => {
     const habis = barang.filter(b => b.stok === 0).length;
@@ -468,7 +471,6 @@ export const StokView = {
   `,
 };
 
-// View untuk halaman manajemen staff
 export const StaffView = {
   HalamanStaff: (staff: Staff[]) => {
     const aktif = staff.filter(s => s.aktif).length;
@@ -505,7 +507,6 @@ export const StaffView = {
     return AdminLayout("Manajemen Staff", "staff", content);
   },
 
-  // View untuk halaman registrasi staff baru
   HalamanRegistrasi: (error?: string) => {
     const content = `
       <div class="py-4 sm:py-6 max-w-xl mx-auto w-full">
@@ -526,7 +527,6 @@ export const StaffView = {
     return AdminLayout("Registrasi Staff", "staff", content);
   },
 
-  // View untuk halaman edit data staff
   HalamanEditStaff: (s: Staff, error?: string) => {
     const content = `
       <div class="py-4 sm:py-6 max-w-xl mx-auto w-full">
