@@ -14,7 +14,7 @@ type Pesanan = {
   items: string;
   total_harga: number;
   status: string;
-  status_bayar: number;
+  status_bayar: string; 
   no_hp: string;
   alamat?: string;
   status_makanan?: string;
@@ -169,7 +169,7 @@ export const AdminView = {
     const { stok, pesanan, staff } = data;
     const stokAktif = stok.filter(s => s.stok > 0).length;
     const totalPesananAll = pesanan.length;
-    const pesananLunas = pesanan.filter(p => (p.status_bayar as unknown as string) === 'Lunas' || p.status_bayar === 1 || (p.status_bayar as unknown as string) === '1');
+    const pesananLunas = pesanan.filter(p => p.status_bayar === 'Lunas');
     const totalPendapatanAll = pesananLunas.reduce((sum, p) => sum + p.total_harga, 0);
     
     const staffAktif = staff.filter(s => s.aktif).length;
@@ -241,7 +241,7 @@ export const AdminView = {
   }
 };
 
-// View untuk halaman manajemen pesanan (Desain Kartu dengan Tombol Status)
+// View untuk halaman manajemen pesanan
 export const PesananView = {
   HalamanPesanan: (stats: any, pesananAktif: any[]) => {
     const content = `
@@ -280,7 +280,6 @@ export const PesananView = {
           <span class="bg-blue-100 text-blue-700 px-4 py-1.5 rounded-full text-sm font-bold shadow-sm">${pesananAktif.length} Antrian</span>
         </div>
 
-        <!-- DAFTAR PESANAN DENGAN KARTU YANG LEBIH SEDERHANA -->
         <div class="flex flex-col gap-4">
           ${pesananAktif.length === 0 ? '<div class="bg-white p-10 rounded-2xl text-center text-gray-400 italic font-medium border border-gray-100 shadow-sm">Belum ada pesanan yang masuk.</div>' : ''}
           
@@ -296,19 +295,19 @@ export const PesananView = {
             }
             
             const isSelesai = p.status === 'Selesai';
-            const isBayarLunas = p.status_bayar === 'Lunas' || p.status_bayar === 1 || p.status_bayar === '1';
+            const isBayarLunas = p.status_bayar === 'Lunas'; // Cukup cek string 'Lunas'
             const isMakananSiap = p.status_makanan === 'Selesai';
             
             const noHpBersih = p.catatan ? p.catatan.replace('HP: ', '').trim() : (p.no_hp || '-');
             const namaPelanggan = p.nama_pelanggan || p.nama || 'Tanpa Nama'; 
             
+            // Format Alamat (Tampilkan - jika tidak ada)
             const alamat = (p.alamat && p.alamat.trim() !== '') ? p.alamat : '-';
 
             return `
               <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden ${isSelesai ? 'opacity-70 bg-gray-50' : 'hover:shadow-md transition'}">
                 <div class="p-4 sm:p-5">
                   
-                  <!-- Header Kartu -->
                   <div class="flex justify-between items-start mb-4 border-b border-gray-100 pb-3">
                     <div class="flex items-center gap-3">
                       <div class="bg-[#1e3a5f] text-white w-10 h-10 rounded-lg flex items-center justify-center font-black text-xl shadow-inner">
@@ -325,7 +324,6 @@ export const PesananView = {
                     }
                   </div>
 
-                  <!-- Detail Pesanan & Alamat -->
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-sm">
                     <div class="space-y-3">
                       <div>
@@ -343,24 +341,20 @@ export const PesananView = {
                     </div>
                   </div>
 
-                  <!-- Bar Aksi Tombol (Bergaya Badge Status) -->
                   <div class="flex flex-col sm:flex-row flex-wrap gap-2 items-center justify-between bg-gray-50 -mx-4 -mb-4 sm:-mx-5 sm:-mb-5 p-3 sm:p-4 border-t border-gray-100">
                     <div class="flex flex-wrap gap-2 w-full sm:w-auto">
                       
-                      <!-- Status Pembayaran (Berada di kiri, diklik untuk ubah status) -->
                       ${isBayarLunas
                          ? `<button hx-post="/admin/batal-bayar/${p.id}" hx-target="body" title="Klik untuk membatalkan status bayar" class="flex-1 sm:flex-none bg-green-50 text-green-700 border border-green-200 px-3 py-2 rounded-lg font-bold text-xs hover:bg-green-100 transition text-center shadow-sm">✅ Sudah Lunas</button>`
                          : `<button hx-post="/admin/selesaikan-bayar/${p.id}" hx-target="body" title="Klik untuk menandai lunas" class="flex-1 sm:flex-none bg-red-50 text-red-600 border border-red-200 px-3 py-2 rounded-lg font-bold text-xs hover:bg-red-100 transition text-center shadow-sm">❌ Belum Lunas</button>`
                       }
                       
-                      <!-- Status Makanan (Berada di kanan, diklik untuk ubah status) -->
                       ${isMakananSiap
                          ? `<button hx-post="/admin/batal-makanan/${p.id}" hx-target="body" title="Klik untuk membatalkan status makanan" class="flex-1 sm:flex-none bg-green-50 text-green-700 border border-green-200 px-3 py-2 rounded-lg font-bold text-xs hover:bg-green-100 transition text-center shadow-sm">✅ Makanan Siap</button>`
                          : `<button hx-post="/admin/selesaikan-makanan/${p.id}" hx-target="body" title="Klik untuk menandai makanan siap" class="flex-1 sm:flex-none bg-orange-50 text-orange-600 border border-orange-200 px-3 py-2 rounded-lg font-bold text-xs hover:bg-orange-100 transition text-center shadow-sm">🍳 Makanan Belum Siap</button>`
                       }
                     </div>
                     
-                    <!-- Tombol Selesai Semua -->
                     <div class="w-full sm:w-auto mt-2 sm:mt-0">
                       ${isSelesai
                          ? `<button hx-post="/admin/batal-selesaikan/${p.id}" hx-target="body" class="w-full sm:w-auto bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold text-xs hover:bg-gray-300 transition text-center border border-gray-300">Batalkan Selesai</button>`
