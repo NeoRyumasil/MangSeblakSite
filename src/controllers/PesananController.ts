@@ -50,14 +50,35 @@ export const PesananController = new Elysia()
       alamat: input.alamat || "" 
     });
 
+    // Menampilkan Pesan Sukses & QRIS
     return `
-      <div class="text-center bg-green-50 text-green-700 p-10 rounded-2xl border border-green-200 max-w-2xl mx-auto mt-10 shadow-sm">
-        <div class="text-6xl mb-4">🎉</div>
-        <h2 class="text-3xl font-bold mb-2">Pesanan Berhasil Dibuat!</h2>
-        <p class="text-lg text-gray-700">Atas nama <strong class="text-green-800">${input.nama_pembeli}</strong> (HP: ${input.no_hp})</p>
-        <p class="text-lg text-gray-700">No. Antrian Anda: <strong class="text-green-800 text-2xl">${noAntrianBaru}</strong></p>
-        <p class="mt-4 text-gray-600">Pesanan telah masuk ke sistem kami. Mohon tunggu panggilan dari Mang Jay ya!</p>
-        <a href="/menu" class="inline-block mt-8 px-6 py-3 bg-green-600 text-white font-bold rounded-xl shadow hover:bg-green-700 transition">Kembali ke Menu</a>
+      <div class="text-center bg-green-50 text-green-700 p-6 md:p-10 rounded-2xl border border-green-200 max-w-2xl mx-auto mt-6 shadow-sm">
+        <div class="text-5xl md:text-6xl mb-4">🎉</div>
+        <h2 class="text-2xl md:text-3xl font-bold mb-2">Pesanan Berhasil Dibuat!</h2>
+        <p class="text-sm md:text-base text-gray-700 mb-4">Atas nama <strong class="text-green-800">${input.nama_pembeli}</strong> (HP: ${input.no_hp})</p>
+        
+        <div class="bg-white rounded-xl p-4 inline-block mb-6 border border-green-100 shadow-sm">
+           <p class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">No. Antrian Anda</p>
+           <p class="text-green-800 text-4xl md:text-5xl font-black">#${noAntrianBaru}</p>
+        </div>
+        
+        <hr class="border-green-200 mb-6 mx-8">
+        
+        <h3 class="text-lg md:text-xl font-black text-gray-800 mb-2">💳 Silakan Lakukan Pembayaran</h3>
+        <p class="text-gray-600 mb-4 text-xs md:text-sm leading-relaxed">
+          Total tagihan Anda adalah <strong class="text-red-600 text-base">Rp ${totalHarga.toLocaleString('id-ID')}</strong>.<br/>
+          Scan QRIS di bawah ini untuk membayar pesanan Anda.
+        </p>
+        
+        <div class="bg-white p-3 rounded-xl inline-block shadow border border-gray-200 mb-6">
+           <img src="https://raw.githubusercontent.com/NeoRyumasil/MangSeblakSite/main/public/QR/QR.jpeg" alt="QRIS Mang Jay" class="w-48 md:w-64 h-auto mx-auto rounded-lg">
+        </div>
+        
+        <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl text-blue-800 text-xs md:text-sm font-medium mb-8">
+          ℹ️ Setelah melakukan pembayaran, silakan tunjukkan <strong>Bukti Transfer</strong> dan <strong>Nomor Antrian</strong> Anda kepada Kasir agar pesanan segera diproses.
+        </div>
+        
+        <a href="/menu" class="inline-block px-6 py-3.5 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition w-full md:w-auto">Pesan Menu Lainnya</a>
       </div>
     `;
   })
