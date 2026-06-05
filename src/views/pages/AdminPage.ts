@@ -96,7 +96,7 @@ const TopBar = (title: string, activeTab: string) => `
         { href: "/admin/stok", label: "🥬 Stok", key: "stok" },
         { href: "/admin/staff", label: "👥 Staff", key: "staff" },
       ].map(item => `
-        <a href="${item.href}" class="whitespace-nowrap px-4 py-2 rounded-lg text-xs font-semibold transition ${activeTab === item.key ? "bg-red-600 text-white shadow-md" : "text-white/60 hover:bg-white/10"}">
+        <a href="${item.href}" class="whitespace-nowrap px-4 py-2 rounded-lg text-xs font-semibold transition ${activeTab === item.key ? "bg-red-600 text-white shadow-md" : "text-white/60 hover:bg-white/10"}"">
           ${item.label}
         </a>
       `).join("")}
@@ -172,6 +172,40 @@ export const AdminView = {
     
     const staffAktif = staff.filter(s => s.aktif).length;
 
+    // ========================================================
+    // LOGIK PENYELEKSIAN PENJUALAN MENU DAN TOTAL VOUCHER
+    // ========================================================
+    let totalSeblakTerjual = 0;
+    let totalAirMineralTerjual = 0;
+    let totalVoucherTerpakai = 0;
+
+    pesanan.forEach(p => {
+      // Hitung kuantitas voucher terpakai
+      if (p.voucher === 'Ya') {
+        totalVoucherTerpakai += 1;
+      }
+
+      // Hitung item terjual
+      try {
+        const items = JSON.parse(p.items);
+        if (Array.isArray(items)) {
+          items.forEach((item: any) => {
+            const namaMenu = item.nama.toLowerCase();
+            const qty = Number(item.qty) || 0;
+
+            if (namaMenu.includes("seblak")) {
+              totalSeblakTerjual += qty;
+            } else if (namaMenu.includes("air") || namaMenu.includes("mineral") || namaMenu.includes("aqua")) {
+              totalAirMineralTerjual += qty;
+            }
+          });
+        }
+      } catch (e) {
+        console.error("Gagal melakukan parsing items JSON pada ID: " + p.id_pesanan, e);
+      }
+    });
+    // ========================================================
+
     const content = `
       <div class="py-4 sm:py-6 space-y-8 sm:space-y-10">
         <div>
@@ -198,6 +232,46 @@ export const AdminView = {
             <p class="text-2xl sm:text-3xl font-black text-gray-800">${staffAktif}</p>
           </div>
         </div>
+
+        <section>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg sm:text-xl font-black text-gray-800">📈 Analisis Menu & Promo Terjual</h2>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-gradient-to-br from-orange-50 to-white rounded-2xl p-5 border border-orange-100 shadow-sm flex items-center justify-between">
+              <div class="space-y-1">
+                <span class="text-2xl">🍲</span>
+                <p class="text-sm font-bold text-gray-700">Total Seblak Terjual</p>
+                <p class="text-xs text-gray-400">Total porsi dari semua antrian</p>
+              </div>
+              <div class="text-right">
+                <p class="text-3xl font-black text-orange-600">${totalSeblakTerjual} <span class="text-xs font-bold text-gray-500">Porsi</span></p>
+              </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-5 border border-blue-100 shadow-sm flex items-center justify-between">
+              <div class="space-y-1">
+                <span class="text-2xl">🥤</span>
+                <p class="text-sm font-bold text-gray-700">Total Air Mineral Terjual</p>
+                <p class="text-xs text-gray-400">Total botol dari semua antrian</p>
+              </div>
+              <div class="text-right">
+                <p class="text-3xl font-black text-blue-600">${totalAirMineralTerjual} <span class="text-xs font-bold text-gray-500">Botol</span></p>
+              </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-purple-50 to-white rounded-2xl p-5 border border-purple-100 shadow-sm flex items-center justify-between">
+              <div class="space-y-1">
+                <span class="text-2xl">🎟️</span>
+                <p class="text-sm font-bold text-gray-700">Voucher Terpakai</p>
+                <p class="text-xs text-gray-400">Jumlah klaim diskon potongan harga</p>
+              </div>
+              <div class="text-right">
+                <p class="text-3xl font-black text-purple-600">${totalVoucherTerpakai} <span class="text-xs font-bold text-gray-500">Klaim</span></p>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <section>
           <div class="flex items-center justify-between mb-4">
@@ -333,7 +407,6 @@ export const PesananView = {
                       </div>
                     </div>
                     
-                    <!-- AREA TOTAL HARGA & TOMBOL VOUCHER -->
                     <div class="md:text-right">
                       <span class="block text-[10px] font-bold text-gray-400 uppercase">Total Tagihan</span>
                       <p class="text-2xl font-black text-red-600 mt-1 mb-1">Rp ${p.total_harga.toLocaleString('id-ID')}</p>
